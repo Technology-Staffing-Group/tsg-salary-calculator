@@ -1,0 +1,98 @@
+// ============================================================
+// Shared types for the TSG Calculator Frontend
+// ============================================================
+
+export type CountryCode = 'CH' | 'RO' | 'ES';
+export type CalculationBasis = 'NET' | 'GROSS' | 'TOTAL_COST';
+export type Period = 'MONTHLY' | 'YEARLY';
+export type PensionPlanMode = 'MANDATORY_BVG' | 'SUPER_OBLIGATORY';
+export type PricingMode = 'TARGET_MARGIN' | 'CLIENT_RATE' | 'CLIENT_BUDGET';
+export type RateType = 'DAILY' | 'HOURLY';
+export type AppMode = 'employee' | 'b2b' | 'allocation';
+
+export interface ContributionDetail {
+  name: string;
+  rate: number;
+  base: number;
+  amount: number;
+}
+
+export interface EmployeeResult {
+  grossSalaryMonthly: number;
+  grossSalaryYearly: number;
+  netSalaryMonthly: number;
+  netSalaryYearly: number;
+  totalEmployerCostMonthly: number;
+  totalEmployerCostYearly: number;
+  employeeContributions: ContributionDetail[];
+  employerContributions: ContributionDetail[];
+  totalEmployeeContributions: number;
+  totalEmployerContributions: number;
+  taxableBase?: number;
+  incomeTax?: number;
+  incomeTaxMonthly?: number;
+  dailyRate: number;
+  marginVsClientRate?: number;
+  currency: string;
+  country: CountryCode;
+  occupationRate: number;
+}
+
+export interface B2BResult {
+  costRate: number;
+  costRateDaily: number;
+  clientRate: number;
+  clientRateDaily: number;
+  marginAmount: number;
+  marginPercent: number;
+  markupPercent: number;
+  dailyProfit: number;
+  annualProfit: number;
+  annualRevenue: number;
+  annualCost: number;
+  currency: string;
+  pricingMode: PricingMode;
+}
+
+export interface ClientResult {
+  clientName: string;
+  allocationPercent: number;
+  dailyRate: number;
+  revenuePerDay: number;
+  profitPerDay: number;
+  isBaseline: boolean;
+  annualProfit: number;
+}
+
+export interface AllocationResult {
+  engagedSalary: number;
+  employerCost: number;
+  baseDailyCost: number;
+  clients: ClientResult[];
+  totalDailyProfit: number;
+  annualProfit: number;
+  totalAllocationPercent: number;
+  engagementPercent: number;
+  currency: string;
+  workingDaysPerYear: number;
+}
+
+export interface FXData {
+  rates: Record<string, number>;
+  lastUpdate: string;
+  baseCurrency: string;
+}
+
+export interface CHAdvancedOptions {
+  lppRate: number;
+  lfpRate: number;
+  laaNonProfessionalRate: number;
+  pensionPlanMode: PensionPlanMode;
+}
+
+export interface ROAdvancedOptions {
+  disabledTaxExemption: boolean;
+  monthlyMealBenefits: number;
+  baseFunctionToggle: boolean;
+  dependents: number;
+}

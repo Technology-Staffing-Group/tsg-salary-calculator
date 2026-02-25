@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tsg-red: #D6001C;
+  --tsg-black: #1A1A1A;
+}
+
+body {
+  @apply bg-gray-50 text-gray-800 font-sans antialiased;
+  margin: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #adb5bd; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6c757d; }
+
+/* Tab transitions */
+.tab-content-enter { opacity: 0; transform: translateY(8px); }
+.tab-content-enter-active { opacity: 1; transform: translateY(0); transition: all 0.2s ease; }
+
+/* Input focus styles */
+input:focus, select:focus {
+  @apply ring-2 ring-tsg-blue-500 border-tsg-blue-500;
+}
+
+/* Print styles */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}

@@ -484,13 +484,17 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
   y = (doc as any).lastAutoTable.finalY + 6;
 
   // --- Deductions Table ---
+  const hasCappedBase = result.deductions.some(d => !d.isManual && d.base < result.grossMonthlySalary);
+
   const deductionHead = showAligned
-    ? [['Code', 'Description', 'Rate', `Amount (${cur})`, `Amount (${alignmentCurrency})`]]
-    : [['Code', 'Description', 'Rate', `Amount (${cur})`]];
+    ? [['Code', 'Description', 'Base', 'Rate', `Amount (${cur})`, `Amount (${alignmentCurrency})`]]
+    : [['Code', 'Description', 'Base', 'Rate', `Amount (${cur})`]];
 
   const deductionBody = result.deductions.map(d => {
     const rateStr = d.isManual ? 'Manual' : `${d.rate.toFixed(3)}%`;
-    const row = [d.code, d.label, rateStr, `-${formatNum(d.amount)}`];
+    const isCapped = !d.isManual && d.base < result.grossMonthlySalary;
+    const baseStr = d.isManual ? '-' : `${formatNum(d.base)}${isCapped ? ' *' : ''}`;
+    const row = [d.code, d.label, baseStr, rateStr, `-${formatNum(d.amount)}`];
     if (showAligned) {
       row.push(`-${formatNum(convertAmt(d.amount, cur, alignmentCurrency!, rates!))}`);
     }
@@ -498,9 +502,10 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
   });
 
   // Total row
+  const totalColSpan = showAligned ? 6 : 5;
   const totalRow = showAligned
-    ? ['', 'TOTAL DEDUCTIONS', '', `-${formatNum(result.totalDeductions)}`, `-${formatNum(convertAmt(result.totalDeductions, cur, alignmentCurrency!, rates!))}`]
-    : ['', 'TOTAL DEDUCTIONS', '', `-${formatNum(result.totalDeductions)}`];
+    ? ['', 'TOTAL DEDUCTIONS', '', '', `-${formatNum(result.totalDeductions)}`, `-${formatNum(convertAmt(result.totalDeductions, cur, alignmentCurrency!, rates!))}`]
+    : ['', 'TOTAL DEDUCTIONS', '', '', `-${formatNum(result.totalDeductions)}`];
   deductionBody.push(totalRow);
 
   autoTable(doc, {
@@ -511,18 +516,38 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
     headStyles: { fillColor: [180, 60, 60], fontSize: 8 },
     styles: { fontSize: 8 },
     columnStyles: showAligned
-      ? { 3: { halign: 'right', textColor: [200, 50, 50] }, 4: { halign: 'right', textColor: [100, 80, 170] } }
-      : { 3: { halign: 'right', textColor: [200, 50, 50] } },
+      ? { 2: { halign: 'right' }, 4: { halign: 'right', textColor: [200, 50, 50] }, 5: { halign: 'right', textColor: [100, 80, 170] } }
+      : { 2: { halign: 'right' }, 4: { halign: 'right', textColor: [200, 50, 50] } },
     didParseCell: (data: any) => {
       // Bold the total row
       if (data.row.index === deductionBody.length - 1) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = [255, 245, 245];
       }
+      // Highlight capped base cells in amber
+      if (data.section === 'body' && data.column.index === 2 && data.row.index < deductionBody.length - 1) {
+        const d = result.deductions[data.row.index];
+        if (d && !d.isManual && d.base < result.grossMonthlySalary) {
+          data.cell.styles.textColor = [180, 100, 20];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
     },
     margin: { left: 14, right: 14 },
   });
-  y = (doc as any).lastAutoTable.finalY + 6;
+  y = (doc as any).lastAutoTable.finalY;
+
+  // Cap footnote
+  if (hasCappedBase) {
+    y += 2;
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(180, 100, 20);
+    doc.text('* Base capped at 12,350.00 (annual ceiling 148\'200 / 12 months)', 14, y);
+    y += 6;
+  } else {
+    y += 6;
+  }
 
   // --- Net Salary ---
   const netHead = showAligned

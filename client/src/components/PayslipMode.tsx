@@ -22,6 +22,9 @@ const DEFAULT_DEDUCTIONS = [
   { code: 'MAL', label: 'Sickness (IJM)',     rate: 0.407 },
 ];
 
+// Monthly ceiling for AC and AANP base (annual 148'200 / 12 = 12'350)
+const AC_AANP_MONTHLY_CAP = 12350;
+
 interface DeductionInput {
   code: string;
   label: string;
@@ -72,13 +75,20 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
     const gross = Number(grossMonthlySalary);
     if (!gross || gross <= 0) return;
 
+    // Codes whose base is capped at AC_AANP_MONTHLY_CAP when gross exceeds it
+    const CAPPED_CODES = ['AC', 'ACC'];
+
     const lines: PayslipDeductionLine[] = deductions.map(d => {
       const r = Number(d.rate);
-      const amount = Math.round(gross * r / 100 * 100) / 100;
+      // AC and AANP: if gross > 12'350, base is capped at 12'350
+      const base = CAPPED_CODES.includes(d.code) && gross > AC_AANP_MONTHLY_CAP
+        ? AC_AANP_MONTHLY_CAP
+        : gross;
+      const amount = Math.round(base * r / 100 * 100) / 100;
       return {
         code: d.code,
         label: d.label,
-        base: gross,
+        base,
         rate: r,
         amount,
         isManual: false,
@@ -283,37 +293,50 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
             {/* Deductions */}
             <div className="px-5 py-3 border-b border-gray-200">
               <h4 className="text-[10px] font-semibold text-gray-400 uppercase mb-2">Deductions</h4>
+              {/* Cap notice */}
+              {result.grossMonthlySalary > AC_AANP_MONTHLY_CAP && (
+                <p className="text-[10px] text-amber-600 mb-2">
+                  AC &amp; AANP base capped at {fmt(AC_AANP_MONTHLY_CAP)} {currency} (annual ceiling 148&apos;200 / 12)
+                </p>
+              )}
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-gray-400">
                       <th className="text-left py-1 font-medium">Code</th>
                       <th className="text-left py-1 font-medium">Description</th>
+                      <th className="text-right py-1 font-medium">Base</th>
                       <th className="text-right py-1 font-medium">Rate</th>
                       <th className="text-right py-1 font-medium">Amount</th>
                       {showAligned && currency !== alignmentCurrency && <th className="text-right py-1 font-medium text-indigo-400">{alignmentCurrency}</th>}
                     </tr>
                   </thead>
                   <tbody>
-                    {result.deductions.map((d, i) => (
-                      <tr key={i} className="border-b border-gray-50">
-                        <td className="py-1.5 font-mono text-gray-500">{d.code}</td>
-                        <td className="py-1.5 text-gray-700">{d.label}</td>
-                        <td className="py-1.5 text-right font-mono text-gray-500">
-                          {d.isManual ? 'Manual' : `${d.rate.toFixed(3)}%`}
-                        </td>
-                        <td className="py-1.5 text-right font-mono text-red-600">-{fmt(d.amount)}</td>
-                        {showAligned && currency !== alignmentCurrency && (
-                          <td className="py-1.5 text-right font-mono text-indigo-500 text-[11px]">
-                            -{fmt(convertAmt(d.amount, currency, alignmentCurrency, rates))}
+                    {result.deductions.map((d, i) => {
+                      const isCapped = !d.isManual && d.base < result.grossMonthlySalary;
+                      return (
+                        <tr key={i} className="border-b border-gray-50">
+                          <td className="py-1.5 font-mono text-gray-500">{d.code}</td>
+                          <td className="py-1.5 text-gray-700">{d.label}</td>
+                          <td className={`py-1.5 text-right font-mono ${isCapped ? 'text-amber-600 font-semibold' : 'text-gray-400'}`}>
+                            {d.isManual ? '-' : fmt(d.base)}{isCapped && ' *'}
                           </td>
-                        )}
-                      </tr>
-                    ))}
+                          <td className="py-1.5 text-right font-mono text-gray-500">
+                            {d.isManual ? 'Manual' : `${d.rate.toFixed(3)}%`}
+                          </td>
+                          <td className="py-1.5 text-right font-mono text-red-600">-{fmt(d.amount)}</td>
+                          {showAligned && currency !== alignmentCurrency && (
+                            <td className="py-1.5 text-right font-mono text-indigo-500 text-[11px]">
+                              -{fmt(convertAmt(d.amount, currency, alignmentCurrency, rates))}
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                   <tfoot>
                     <tr className="bg-red-50 font-semibold">
-                      <td colSpan={3} className="py-2 text-gray-700 text-xs">Total Deductions</td>
+                      <td colSpan={4} className="py-2 text-gray-700 text-xs">Total Deductions</td>
                       <td className="py-2 text-right font-mono text-red-700">-{fmt(result.totalDeductions)}</td>
                       {showAligned && currency !== alignmentCurrency && (
                         <td className="py-2 text-right font-mono text-indigo-600 text-[11px]">

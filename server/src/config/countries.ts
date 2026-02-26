@@ -156,6 +156,10 @@ export interface EmployeeResult {
   incomeTaxMonthly?: number;
   dailyRate: number;
   marginVsClientRate?: number;
+  /** The original 100% FTE yearly amount entered by the user */
+  fteAmountYearly?: number;
+  /** The effective yearly amount after applying occupation rate */
+  effectiveAmountYearly?: number;
   currency: string;
   country: CountryCode;
   occupationRate: number;

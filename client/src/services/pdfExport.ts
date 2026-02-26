@@ -104,15 +104,20 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
   doc.text('Input Summary', 14, y);
   y += 6;
 
+  const inputRows: string[][] = [
+    ['Country', `${countryNames[result.country] || result.country} (${result.currency})`],
+    ['Calculation Basis', inputs.calculationBasis],
+    ['Input Amount (100% FTE)', `${formatNum(inputs.amount)} ${result.currency} (${inputs.period})`],
+    ['Occupation Rate', `${result.occupationRate}%`],
+  ];
+  if (result.occupationRate < 100 && result.effectiveAmountYearly) {
+    inputRows.push(['Effective Amount (Yearly)', `${formatNum(result.effectiveAmountYearly)} ${result.currency}`]);
+  }
+
   autoTable(doc, {
     startY: y,
     head: [['Parameter', 'Value']],
-    body: [
-      ['Country', `${countryNames[result.country] || result.country} (${result.currency})`],
-      ['Calculation Basis', inputs.calculationBasis],
-      ['Input Amount', `${formatNum(inputs.amount)} ${result.currency} (${inputs.period})`],
-      ['Occupation Rate', `${result.occupationRate}%`],
-    ],
+    body: inputRows,
     theme: 'grid',
     headStyles: { fillColor: [45, 45, 45] },
     styles: { fontSize: 9 },
@@ -121,10 +126,47 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
 
   y = (doc as any).lastAutoTable.finalY + 8;
 
+  // Business Metrics
+  if (inputs.metrics) {
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Business Metrics', 14, y);
+    y += 6;
+
+    const metricsBody: string[][] = [
+      ['Daily Cost Rate', `${formatNum(inputs.metrics.dailyCostRate)} ${result.currency}`],
+    ];
+    if (inputs.metrics.dailyPlacementRate !== undefined) {
+      const label = inputs.marginInputType === 'FIXED_DAILY' ? 'Daily Placement Rate (Fixed)' : 'Daily Placement Rate';
+      metricsBody.push([label, `${formatNum(inputs.metrics.dailyPlacementRate)} ${result.currency}`]);
+    }
+    if (inputs.metrics.dailyRevenue !== undefined) {
+      metricsBody.push(['Daily Revenue', `${formatNum(inputs.metrics.dailyRevenue)} ${result.currency}`]);
+    }
+    if (inputs.metrics.marginPct !== undefined) {
+      metricsBody.push(['Margin %', `${inputs.metrics.marginPct.toFixed(1)}%`]);
+    }
+    if (inputs.metrics.markupPct !== undefined) {
+      metricsBody.push(['Markup %', `${inputs.metrics.markupPct.toFixed(1)}%`]);
+    }
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Metric', 'Value']],
+      body: metricsBody,
+      theme: 'grid',
+      headStyles: { fillColor: [46, 134, 193] },
+      styles: { fontSize: 9 },
+      margin: { left: 14, right: 14 },
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
+
   // Results Summary
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('Calculation Results', 14, y);
+  doc.text('Salary Summary', 14, y);
   y += 6;
 
   autoTable(doc, {
@@ -143,11 +185,11 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
 
   y = (doc as any).lastAutoTable.finalY + 8;
 
-  // Employee Contributions
+  // Employee Contributions (monthly base)
   if (result.employeeContributions.length > 0) {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('Employee Contributions', 14, y);
+    doc.text('Employee Contributions (Monthly)', 14, y);
     y += 5;
 
     autoTable(doc, {
@@ -157,11 +199,11 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
         ...result.employeeContributions.map(c => [
           c.name,
           `${(c.rate * 100).toFixed(2)}%`,
-          `${formatNum(c.base)} ${result.currency}`,
-          `${formatNum(c.amount)} ${result.currency}`,
+          `${formatNum(c.base / 12)} ${result.currency}`,
+          `${formatNum(c.amount / 12)} ${result.currency}`,
         ]),
-        ...(result.incomeTax !== undefined ? [['Income Tax', `${result.country === 'RO' ? '10%' : 'Progressive'}`, `${formatNum(result.taxableBase || 0)} ${result.currency}`, `${formatNum(result.incomeTax)} ${result.currency}`]] : []),
-        ['TOTAL', '', '', `${formatNum(result.totalEmployeeContributions)} ${result.currency}`],
+        ...(result.incomeTax !== undefined ? [['Income Tax', `${result.country === 'RO' ? '10%' : 'Progressive'}`, `${formatNum((result.taxableBase || 0) / 12)} ${result.currency}`, `${formatNum(result.incomeTax / 12)} ${result.currency}`]] : []),
+        ['TOTAL', '', '', `${formatNum(result.totalEmployeeContributions / 12)} ${result.currency}`],
       ],
       theme: 'grid',
       headStyles: { fillColor: [100, 100, 100] },
@@ -172,11 +214,11 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
     y = (doc as any).lastAutoTable.finalY + 8;
   }
 
-  // Employer Contributions
+  // Employer Contributions (monthly base)
   if (result.employerContributions.length > 0) {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text('Employer Contributions', 14, y);
+    doc.text('Employer Contributions (Monthly)', 14, y);
     y += 5;
 
     autoTable(doc, {
@@ -186,10 +228,10 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
         ...result.employerContributions.map(c => [
           c.name,
           `${(c.rate * 100).toFixed(3)}%`,
-          `${formatNum(c.base)} ${result.currency}`,
-          `${formatNum(c.amount)} ${result.currency}`,
+          `${formatNum(c.base / 12)} ${result.currency}`,
+          `${formatNum(c.amount / 12)} ${result.currency}`,
         ]),
-        ['TOTAL', '', '', `${formatNum(result.totalEmployerContributions)} ${result.currency}`],
+        ['TOTAL', '', '', `${formatNum(result.totalEmployerContributions / 12)} ${result.currency}`],
       ],
       theme: 'grid',
       headStyles: { fillColor: [100, 100, 100] },
@@ -200,29 +242,19 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
     y = (doc as any).lastAutoTable.finalY + 8;
   }
 
-  // Business Metrics
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Business Metrics', 14, y);
-  y += 5;
+  y = addDisclaimer(doc, y);
 
-  const metricsBody = [
-    ['Employer Daily Rate', `${formatNum(result.dailyRate)} ${result.currency}`],
-  ];
-  if (result.marginVsClientRate !== undefined) {
-    metricsBody.push(['Margin vs Client Rate', `${formatNum(result.marginVsClientRate)} ${result.currency}`]);
+  // Switzerland-specific disclaimer
+  if (result.country === 'CH') {
+    const pageHeight = doc.internal.pageSize.getHeight();
+    if (y > pageHeight - 25) { doc.addPage(); y = 20; }
+    doc.setFillColor(235, 245, 255);
+    doc.rect(14, y, 182, 12, 'F');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(50, 80, 140);
+    doc.text('Note: Income tax is not included. Swiss income tax varies by canton, commune, and church affiliation.', 16, y + 5, { maxWidth: 178 });
   }
-
-  autoTable(doc, {
-    startY: y,
-    body: metricsBody,
-    theme: 'grid',
-    styles: { fontSize: 9 },
-    margin: { left: 14, right: 14 },
-  });
-
-  y = (doc as any).lastAutoTable.finalY + 10;
-  addDisclaimer(doc, y);
 
   doc.save(`TSG_Employee_${result.country}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }

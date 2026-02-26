@@ -33,9 +33,11 @@ export function calculateEmployee(input: EmployeeInput): EmployeeResult {
   // Convert monthly to yearly if needed
   let yearlyAmount = period === 'MONTHLY' ? amount * 12 : amount;
 
-  // Adjust for occupation rate if calculating from gross or net
-  // The calculation engines work with the actual yearly amount
-  // Occupation rate affects working days for daily rate calculation
+  // Apply occupation rate to the calculation base:
+  // The user enters the 100% FTE salary. The actual calculation base
+  // is scaled by the occupation rate (e.g. 10,000/m × 80% = 8,000/m).
+  const occFactor = (occupationRate ?? 100) / 100;
+  const effectiveYearlyAmount = round2(yearlyAmount * occFactor);
 
   let result: EmployeeResult;
 
@@ -44,13 +46,13 @@ export function calculateEmployee(input: EmployeeInput): EmployeeResult {
       const advanced = (advancedOptions ?? {}) as CHAdvancedOptions;
       switch (calculationBasis) {
         case 'GROSS':
-          result = calculateCHFromGross(yearlyAmount, occupationRate, advanced);
+          result = calculateCHFromGross(effectiveYearlyAmount, occupationRate, advanced);
           break;
         case 'NET':
-          result = calculateCHFromNet(yearlyAmount, occupationRate, advanced);
+          result = calculateCHFromNet(effectiveYearlyAmount, occupationRate, advanced);
           break;
         case 'TOTAL_COST':
-          result = calculateCHFromTotalCost(yearlyAmount, occupationRate, advanced);
+          result = calculateCHFromTotalCost(effectiveYearlyAmount, occupationRate, advanced);
           break;
         default:
           throw new Error(`Invalid calculation basis: ${calculationBasis}`);
@@ -62,13 +64,13 @@ export function calculateEmployee(input: EmployeeInput): EmployeeResult {
       const advanced = (advancedOptions ?? {}) as ROAdvancedOptions;
       switch (calculationBasis) {
         case 'GROSS':
-          result = calculateROFromGross(yearlyAmount, occupationRate, advanced);
+          result = calculateROFromGross(effectiveYearlyAmount, occupationRate, advanced);
           break;
         case 'NET':
-          result = calculateROFromNet(yearlyAmount, occupationRate, advanced);
+          result = calculateROFromNet(effectiveYearlyAmount, occupationRate, advanced);
           break;
         case 'TOTAL_COST':
-          result = calculateROFromTotalCost(yearlyAmount, occupationRate, advanced);
+          result = calculateROFromTotalCost(effectiveYearlyAmount, occupationRate, advanced);
           break;
         default:
           throw new Error(`Invalid calculation basis: ${calculationBasis}`);
@@ -80,13 +82,13 @@ export function calculateEmployee(input: EmployeeInput): EmployeeResult {
       const advanced = (advancedOptions ?? {}) as ESAdvancedOptions;
       switch (calculationBasis) {
         case 'GROSS':
-          result = calculateESFromGross(yearlyAmount, occupationRate, advanced);
+          result = calculateESFromGross(effectiveYearlyAmount, occupationRate, advanced);
           break;
         case 'NET':
-          result = calculateESFromNet(yearlyAmount, occupationRate, advanced);
+          result = calculateESFromNet(effectiveYearlyAmount, occupationRate, advanced);
           break;
         case 'TOTAL_COST':
-          result = calculateESFromTotalCost(yearlyAmount, occupationRate, advanced);
+          result = calculateESFromTotalCost(effectiveYearlyAmount, occupationRate, advanced);
           break;
         default:
           throw new Error(`Invalid calculation basis: ${calculationBasis}`);
@@ -98,7 +100,11 @@ export function calculateEmployee(input: EmployeeInput): EmployeeResult {
       throw new Error(`Unsupported country: ${country}`);
   }
 
-  // Add margin vs client daily rate if provided
+  // Store the original 100% FTE amount for reference
+  result.fteAmountYearly = round2(yearlyAmount);
+  result.effectiveAmountYearly = effectiveYearlyAmount;
+
+  // Add margin vs client daily rate if provided (legacy - kept for backwards compat)
   if (clientDailyRate && clientDailyRate > 0) {
     result.marginVsClientRate = round2(clientDailyRate - result.dailyRate);
   }

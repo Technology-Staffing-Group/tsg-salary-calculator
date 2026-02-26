@@ -10,6 +10,9 @@ export type PricingMode = 'TARGET_MARGIN' | 'CLIENT_RATE' | 'CLIENT_BUDGET';
 export type RateType = 'DAILY' | 'HOURLY';
 export type AppMode = 'employee' | 'b2b' | 'allocation' | 'payslip';
 
+// --- Margin Input Type for Employee Mode ---
+export type MarginInputType = 'NONE' | 'TARGET_MARGIN' | 'FIXED_DAILY';
+
 // --- Employee Identity (shared across modes) ---
 export interface EmployeeIdentity {
   employeeName: string;
@@ -40,6 +43,8 @@ export interface EmployeeResult {
   incomeTaxMonthly?: number;
   dailyRate: number;
   marginVsClientRate?: number;
+  fteAmountYearly?: number;
+  effectiveAmountYearly?: number;
   currency: string;
   country: CountryCode;
   occupationRate: number;

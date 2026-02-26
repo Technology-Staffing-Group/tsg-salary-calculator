@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card, InputField, SelectField, Toggle, Button, Disclaimer,
-  ResultRow, ContributionTable, Spinner, ErrorAlert
+  ResultRow, ContributionTable, Spinner, ErrorAlert, HelpTip
 } from './UIComponents';
 import EmployeeIdentityFields from './EmployeeIdentityFields';
 import AlignedCurrencyPanel, { AlignedValue } from './AlignedCurrencyPanel';
 import { api } from '../services/api';
 import { exportEmployeePDF } from '../services/pdfExport';
-import type { EmployeeResult, CountryCode, CalculationBasis, Period, CHAdvancedOptions, ROAdvancedOptions, FXData, EmployeeIdentity } from '../types';
+import type {
+  EmployeeResult, CountryCode, CalculationBasis, Period,
+  CHAdvancedOptions, ROAdvancedOptions, FXData, EmployeeIdentity, MarginInputType
+} from '../types';
 
 const STORAGE_KEY = 'tsg_employee_inputs';
+const WORKING_DAYS = 220;
+
 function loadSaved(): any {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; }
 }
@@ -23,7 +28,11 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
   const [period, setPeriod] = useState<Period>(saved?.period || 'YEARLY');
   const [amount, setAmount] = useState<string>(saved?.amount || '100000');
   const [occRate, setOccRate] = useState<string>(saved?.occRate || '100');
-  const [clientDailyRate, setClientDailyRate] = useState<string>(saved?.clientDailyRate || '');
+
+  // Margin Input Type (replaces old clientDailyRate)
+  const [marginInputType, setMarginInputType] = useState<MarginInputType>(saved?.marginInputType || 'NONE');
+  const [targetMarginPct, setTargetMarginPct] = useState<string>(saved?.targetMarginPct || '30');
+  const [fixedDailyAmount, setFixedDailyAmount] = useState<string>(saved?.fixedDailyAmount || '');
 
   const [lppRate, setLppRate] = useState<string>(saved?.lppRate || '7');
   const [lfpRate, setLfpRate] = useState<string>(saved?.lfpRate || '0.1');
@@ -49,12 +58,13 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      country, basis, period, amount, occRate, clientDailyRate,
+      country, basis, period, amount, occRate,
+      marginInputType, targetMarginPct, fixedDailyAmount,
       lppRate, lfpRate, laaRate, pensionMode,
       disabledExemption, mealBenefits, baseFunction, dependents,
       alignmentCurrency,
     }));
-  }, [country, basis, period, amount, occRate, clientDailyRate, lppRate, lfpRate, laaRate, pensionMode, disabledExemption, mealBenefits, baseFunction, dependents, alignmentCurrency]);
+  }, [country, basis, period, amount, occRate, marginInputType, targetMarginPct, fixedDailyAmount, lppRate, lfpRate, laaRate, pensionMode, disabledExemption, mealBenefits, baseFunction, dependents, alignmentCurrency]);
 
   const calculate = useCallback(async () => {
     if (!amount || Number(amount) <= 0) { setError('Please enter a valid amount greater than 0.'); return; }
@@ -69,18 +79,58 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
       const data = await api.calculateEmployee({
         country, calculationBasis: basis, period, amount: Number(amount),
         occupationRate: Number(occRate), advancedOptions,
-        clientDailyRate: clientDailyRate ? Number(clientDailyRate) : undefined,
       }) as EmployeeResult;
       setResult(data);
     } catch (err: any) { setError(err.message || 'Calculation failed'); }
     finally { setLoading(false); }
-  }, [country, basis, period, amount, occRate, clientDailyRate, lppRate, lfpRate, laaRate, pensionMode, disabledExemption, mealBenefits, baseFunction, dependents]);
+  }, [country, basis, period, amount, occRate, lppRate, lfpRate, laaRate, pensionMode, disabledExemption, mealBenefits, baseFunction, dependents]);
 
   const rates = fxData?.rates || {};
   const av = (amt: number) => (
     <AlignedValue amount={amt} baseCurrency={baseCurrency} alignmentCurrency={alignmentCurrency} rates={rates} showAligned={showAligned} />
   );
   const fmt = (n: number) => n.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // --- Compute business metrics from result ---
+  const computeMetrics = () => {
+    if (!result) return null;
+    const dailyCostRate = result.dailyRate; // totalEmployerCostYearly / 220
+
+    if (marginInputType === 'TARGET_MARGIN') {
+      const marginPct = Number(targetMarginPct) / 100;
+      if (marginPct >= 1) return { dailyCostRate };
+      const dailyPlacementRate = Math.round(dailyCostRate / (1 - marginPct) * 100) / 100;
+      const dailyRevenue = Math.round((dailyPlacementRate - dailyCostRate) * 100) / 100;
+      return { dailyCostRate, dailyPlacementRate, dailyRevenue, marginPct: Number(targetMarginPct) };
+    }
+
+    if (marginInputType === 'FIXED_DAILY') {
+      const fixedAmt = Number(fixedDailyAmount);
+      if (!fixedAmt || fixedAmt <= 0) return { dailyCostRate };
+      const dailyPlacementRate = fixedAmt;
+      const dailyRevenue = Math.round((dailyPlacementRate - dailyCostRate) * 100) / 100;
+      const marginPct = dailyPlacementRate > 0
+        ? Math.round(dailyRevenue / dailyPlacementRate * 10000) / 100
+        : 0;
+      const markupPct = dailyCostRate > 0
+        ? Math.round(dailyRevenue / dailyCostRate * 10000) / 100
+        : 0;
+      return { dailyCostRate, dailyPlacementRate, dailyRevenue, marginPct, markupPct };
+    }
+
+    // NONE
+    return { dailyCostRate };
+  };
+
+  const metrics = result ? computeMetrics() : null;
+
+  // --- Monthly contributions ---
+  const toMonthlyContribs = (contribs: { name: string; rate: number; base: number; amount: number }[]) =>
+    contribs.map(c => ({
+      ...c,
+      base: Math.round(c.base / 12 * 100) / 100,
+      amount: Math.round(c.amount / 12 * 100) / 100,
+    }));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -96,13 +146,42 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
             <SelectField label="Period" value={period} onChange={(v) => setPeriod(v as Period)}
               options={[{ value: 'YEARLY', label: 'Yearly' }, { value: 'MONTHLY', label: 'Monthly' }]} />
             <InputField label="Occupation Rate" value={occRate} onChange={setOccRate} suffix="%" min={0} max={100}
-              help="Employment percentage (e.g., 80% for part-time)." />
+              help="Employment percentage. If gross is 10,000/m at 80%, calculation base is 8,000/m." />
           </div>
           <InputField
-            label={`${basis === 'NET' ? 'Net' : basis === 'TOTAL_COST' ? 'Total Employer Cost' : 'Gross'} Amount (${period === 'MONTHLY' ? 'Monthly' : 'Yearly'})`}
-            value={amount} onChange={setAmount} suffix={baseCurrency} min={0} />
-          <InputField label="Client Daily Rate (optional)" value={clientDailyRate} onChange={setClientDailyRate}
-            suffix={baseCurrency} placeholder="Optional" help="For margin calculation." />
+            label={`${basis === 'NET' ? 'Net' : basis === 'TOTAL_COST' ? 'Total Employer Cost' : 'Gross'} Amount – 100% FTE (${period === 'MONTHLY' ? 'Monthly' : 'Yearly'})`}
+            value={amount} onChange={setAmount} suffix={baseCurrency} min={0}
+            help="Enter the 100% FTE amount. It will be adjusted by the occupation rate." />
+          {Number(occRate) < 100 && Number(occRate) > 0 && Number(amount) > 0 && (
+            <p className="text-xs text-indigo-600 -mt-1 mb-2">
+              Effective calculation base: <strong>{fmt(Number(amount) * Number(occRate) / 100)} {baseCurrency}</strong> ({period === 'MONTHLY' ? 'monthly' : 'yearly'})
+            </p>
+          )}
+        </Card>
+
+        {/* Margin Input */}
+        <Card title="Margin Input Type">
+          <SelectField
+            label="Type"
+            value={marginInputType}
+            onChange={(v) => setMarginInputType(v as MarginInputType)}
+            options={[
+              { value: 'NONE', label: 'None (show daily cost only)' },
+              { value: 'TARGET_MARGIN', label: 'Targeted Margin (%)' },
+              { value: 'FIXED_DAILY', label: 'Fixed Daily Amount' },
+            ]}
+            help="Choose how to compute business placement metrics."
+          />
+          {marginInputType === 'TARGET_MARGIN' && (
+            <InputField label="Target Margin" value={targetMarginPct} onChange={setTargetMarginPct}
+              suffix="%" min={0} max={99} step={1}
+              help="Desired profit margin. Daily Placement Rate = Daily Cost / (1 - Margin%)." />
+          )}
+          {marginInputType === 'FIXED_DAILY' && (
+            <InputField label="Fixed Daily Placement Rate" value={fixedDailyAmount} onChange={setFixedDailyAmount}
+              suffix={baseCurrency} min={0}
+              help="The daily rate charged to the client." />
+          )}
         </Card>
 
         {/* Employee Identity */}
@@ -144,7 +223,11 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
         <div className="flex gap-3">
           <Button onClick={calculate} disabled={loading} className="flex-1">{loading ? 'Calculating...' : 'Calculate'}</Button>
           {result && (
-            <Button variant="outline" onClick={() => exportEmployeePDF(result, { country, calculationBasis: basis, period, amount: Number(amount), occupationRate: Number(occRate) }, identity)}>
+            <Button variant="outline" onClick={() => exportEmployeePDF(result, {
+              country, calculationBasis: basis, period, amount: Number(amount),
+              occupationRate: Number(occRate), marginInputType, targetMarginPct: Number(targetMarginPct),
+              fixedDailyAmount: Number(fixedDailyAmount), metrics,
+            }, identity)}>
               Download PDF
             </Button>
           )}
@@ -161,7 +244,59 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
             alignmentCurrency={alignmentCurrency} setAlignmentCurrency={setAlignmentCurrency}
             showAligned={showAligned} setShowAligned={setShowAligned} />
 
+          {/* ===== BUSINESS METRICS (moved to top) ===== */}
+          <Card title="Business Metrics">
+            {metrics && (<>
+              <ResultRow label="Daily Cost Rate" value="" highlight
+                help="Total Employer Cost (Yearly) / 220 working days.">
+                <span className="text-sm font-mono text-tsg-blue-700">{av(metrics.dailyCostRate)}</span>
+              </ResultRow>
+
+              {metrics.dailyPlacementRate !== undefined && (
+                <ResultRow label={marginInputType === 'FIXED_DAILY' ? 'Daily Placement Rate (Fixed)' : 'Daily Placement Rate'} value="" highlight
+                  help={marginInputType === 'TARGET_MARGIN'
+                    ? 'Daily Cost / (1 - Target Margin %)'
+                    : 'Fixed daily amount entered by the user.'
+                  }>
+                  <span className="text-sm font-mono text-tsg-blue-700">{av(metrics.dailyPlacementRate)}</span>
+                </ResultRow>
+              )}
+
+              {metrics.dailyRevenue !== undefined && (
+                <ResultRow label="Daily Revenue" value=""
+                  help="Daily Placement Rate - Daily Cost Rate.">
+                  <span className={`text-sm font-mono font-semibold ${metrics.dailyRevenue >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+                    {av(metrics.dailyRevenue)}
+                  </span>
+                </ResultRow>
+              )}
+
+              {/* Only show margin/markup for FIXED_DAILY mode */}
+              {marginInputType === 'FIXED_DAILY' && metrics.marginPct !== undefined && (
+                <>
+                  <ResultRow label="Margin %" value={`${metrics.marginPct.toFixed(1)}%`}
+                    help="Revenue as % of placement rate." />
+                  {metrics.markupPct !== undefined && (
+                    <ResultRow label="Markup %" value={`${metrics.markupPct.toFixed(1)}%`}
+                      help="Revenue as % of cost rate." />
+                  )}
+                </>
+              )}
+
+              {/* Show margin label for TARGET_MARGIN mode */}
+              {marginInputType === 'TARGET_MARGIN' && metrics.marginPct !== undefined && (
+                <ResultRow label="Target Margin" value={`${metrics.marginPct.toFixed(1)}%`} />
+              )}
+            </>)}
+          </Card>
+
+          {/* ===== SALARY SUMMARY ===== */}
           <Card title="Salary Summary">
+            {result.occupationRate < 100 && result.fteAmountYearly && (
+              <div className="mb-2 px-3 py-1.5 bg-indigo-50 rounded text-[11px] text-indigo-700">
+                100% FTE: {fmt(result.fteAmountYearly)} {baseCurrency}/yr &rarr; Effective at {result.occupationRate}%: {fmt(result.grossSalaryYearly)} {baseCurrency}/yr
+              </div>
+            )}
             <ResultRow label="Gross Salary (Monthly)" value="" ><span className="text-sm font-mono text-gray-800">{av(result.grossSalaryMonthly)}</span></ResultRow>
             <ResultRow label="Gross Salary (Yearly)" value="" highlight><span className="text-sm font-mono text-tsg-blue-700">{av(result.grossSalaryYearly)}</span></ResultRow>
             <ResultRow label="Net Salary (Monthly)" value=""><span className="text-sm font-mono text-gray-800">{av(result.netSalaryMonthly)}</span></ResultRow>
@@ -178,16 +313,22 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
             </Card>
           )}
 
-          <Card title="Contributions Breakdown">
-            <ContributionTable title="Employee Contributions" contributions={result.employeeContributions} currency={baseCurrency} />
-            <ContributionTable title="Employer Contributions" contributions={result.employerContributions} currency={baseCurrency} />
+          {/* ===== CONTRIBUTIONS - MONTHLY BASE ===== */}
+          <Card title="Contributions Breakdown (Monthly)">
+            <ContributionTable title="Employee Contributions" contributions={toMonthlyContribs(result.employeeContributions)} currency={baseCurrency} />
+            <ContributionTable title="Employer Contributions" contributions={toMonthlyContribs(result.employerContributions)} currency={baseCurrency} />
           </Card>
 
-          <Card title="Business Metrics">
-            <ResultRow label="Employer Daily Rate" value={`${fmt(result.dailyRate)} ${baseCurrency}`} highlight help="Total employer cost / working days." />
-            {result.marginVsClientRate !== undefined && <ResultRow label="Margin vs Client Rate" value={`${fmt(result.marginVsClientRate)} ${baseCurrency}`} highlight />}
-          </Card>
+          {/* ===== DISCLAIMERS ===== */}
           <Disclaimer />
+          {country === 'CH' && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-xs text-blue-700">
+                <strong>Note:</strong> Income tax is <strong>not included</strong> in this calculation.
+                Swiss income tax varies by canton, commune, and church affiliation and must be assessed separately.
+              </p>
+            </div>
+          )}
         </>)}
 
         {!result && !loading && (

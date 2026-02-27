@@ -159,13 +159,100 @@ describe('Romania (RO) Calculator', () => {
     });
   });
 
-  describe('Meal Benefits', () => {
-    it('should add non-taxable meal benefits to net', () => {
+  describe('Meal Benefits (Tichete de Masă)', () => {
+    // Romania 2026: Meal vouchers are subject to CASS (10%) and income tax (10%),
+    // but EXEMPT from CAS (25%) and CAM (2.25%).
+    // Ref: Cod Fiscal Art. 76(3)(h), Art. 142(r), Art. 157(2), Art. 220^4(2)
+
+    it('should add meal benefits to net AFTER CASS and income tax deductions', () => {
       const noMeal = calculateROFromGross(120000, 100);
       const withMeal = calculateROFromGross(120000, 100, { monthlyMealBenefits: 500 });
 
-      // Should add 500*12 = 6000 to net
-      expect(withMeal.netSalaryYearly - noMeal.netSalaryYearly).toBeCloseTo(6000, 0);
+      const mealYearly = 500 * 12; // 6,000 RON
+      const mealCASS = mealYearly * 0.10; // 600 RON
+      const mealTax = mealYearly * 0.10;  // 600 RON (approx, affected by combined taxable base)
+      
+      // Net increase = meals - CASS_on_meals - tax effect
+      // At 10,000/month (no personal deduction):
+      //   CASS increases by 600 (10% of 6000)
+      //   Taxable increases by 6000 - 600 = 5,400 → extra tax = 540
+      //   Net diff = 6000 - 600 - 540 = 4,860
+      const netDiff = withMeal.netSalaryYearly - noMeal.netSalaryYearly;
+      expect(netDiff).toBeLessThan(mealYearly); // Must be less than 6000 (taxes deducted)
+      expect(netDiff).toBeCloseTo(4860, 0); // Exact: 6000 - 600 (CASS) - 540 (tax)
+    });
+
+    it('should include meal vouchers in CASS base but NOT in CAS base', () => {
+      const noMeal = calculateROFromGross(120000, 100);
+      const withMeal = calculateROFromGross(120000, 100, { monthlyMealBenefits: 500 });
+
+      // CAS base should be SAME (meals excluded from CAS)
+      const casNoMeal = noMeal.employeeContributions.find(c => c.name === 'CAS (Social Security)');
+      const casWithMeal = withMeal.employeeContributions.find(c => c.name === 'CAS (Social Security)');
+      expect(casWithMeal?.base).toBe(casNoMeal?.base);
+      expect(casWithMeal?.amount).toBe(casNoMeal?.amount);
+
+      // CASS base should INCREASE by meal amount (meals included in CASS)
+      const cassNoMeal = noMeal.employeeContributions.find(c => c.name === 'CASS (Health Insurance)');
+      const cassWithMeal = withMeal.employeeContributions.find(c => c.name === 'CASS (Health Insurance)');
+      expect(cassWithMeal!.base - cassNoMeal!.base).toBe(6000); // 500 × 12
+      expect(cassWithMeal!.amount - cassNoMeal!.amount).toBeCloseTo(600, 0); // 10% of 6000
+    });
+
+    it('should exclude meal vouchers from CAM base', () => {
+      const noMeal = calculateROFromGross(120000, 100);
+      const withMeal = calculateROFromGross(120000, 100, { monthlyMealBenefits: 500 });
+
+      const camNoMeal = noMeal.employerContributions.find(c => c.name === 'CAM (Work Insurance)');
+      const camWithMeal = withMeal.employerContributions.find(c => c.name === 'CAM (Work Insurance)');
+      // CAM base should be SAME (meals excluded)
+      expect(camWithMeal?.base).toBe(camNoMeal?.base);
+      expect(camWithMeal?.amount).toBe(camNoMeal?.amount);
+    });
+
+    it('should add meal vouchers to employer total cost', () => {
+      const noMeal = calculateROFromGross(120000, 100);
+      const withMeal = calculateROFromGross(120000, 100, { monthlyMealBenefits: 500 });
+
+      const mealYearly = 500 * 12; // 6,000 RON
+      // Employer cost increases by full meal amount (employer pays nominal value, no CAM on meals)
+      expect(withMeal.totalEmployerCostYearly - noMeal.totalEmployerCostYearly).toBeCloseTo(mealYearly, 0);
+    });
+
+    it('should increase taxable base when meal vouchers are added', () => {
+      const noMeal = calculateROFromGross(120000, 100);
+      const withMeal = calculateROFromGross(120000, 100, { monthlyMealBenefits: 500 });
+
+      // Taxable base should increase (meals are in taxable base, partially offset by higher CASS)
+      expect(withMeal.taxableBase!).toBeGreaterThan(noMeal.taxableBase!);
+    });
+
+    it('should verify anuntul.ro example: 4,100 gross + 1,035 meals (no base function)', () => {
+      // Reference: anuntul.ro 2026 example
+      // Gross: 4,100/month, Meals: 45 × 23 = 1,035/month
+      // CAS = 25% × 4,100 = 1,025
+      // CASS = 10% × (4,100 + 1,035) = 513.5
+      // Taxable = 5,135 - 1,025 - 513.5 = 3,596.5
+      // Tax = 359.65
+      // Net cash = 4,100 - 1,025 - 513.5 - 359.65 = 2,201.85
+      // + meals on card: 1,035
+      // Total received: 3,236.85
+      const result = calculateROFromGross(49200, 100, {
+        baseFunctionToggle: false, // no personal deduction (to match reference)
+        monthlyMealBenefits: 1035,
+      });
+
+      // Net should include both cash + meal vouchers after taxes
+      const expectedNetMonthly = 2201.85 + 1035; // ≈ 3,236.85
+      expect(result.netSalaryMonthly).toBeCloseTo(expectedNetMonthly, -1); // within 10 RON
+
+      // CAS should NOT include meals
+      const cas = result.employeeContributions.find(c => c.name === 'CAS (Social Security)');
+      expect(cas?.base).toBe(49200); // 4,100 × 12
+
+      // CASS SHOULD include meals
+      const cass = result.employeeContributions.find(c => c.name === 'CASS (Health Insurance)');
+      expect(cass?.base).toBe(49200 + 1035 * 12); // (4,100 + 1,035) × 12 = 61,620
     });
   });
 

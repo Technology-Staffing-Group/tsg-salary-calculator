@@ -91,6 +91,15 @@ function getTaxFreeAmount(grossMonthly: number): number {
 // ============================================================
 // Core Computation
 // ============================================================
+// Meal Voucher Tax Rules (Romania 2026):
+// Per Cod Fiscal Art. 76(3)(h), Art. 142(r), Art. 157(2), Art. 220^4(2):
+//   - CAS (25%):  EXEMPT – meal vouchers excluded from CAS base
+//   - CASS (10%): TAXED  – meal vouchers included in CASS base
+//   - Income Tax (10%): TAXED – meal vouchers included in taxable base
+//   - CAM (2.25%): EXEMPT – meal vouchers excluded from CAM base
+// The employee receives the meal voucher value minus CASS and income tax on it.
+// The employer pays the nominal voucher value (deductible expense, no CAM on it).
+// ============================================================
 function computeRO(opts: ROCalcOptions): {
   employeeContribs: ContributionDetail[];
   employerContribs: ContributionDetail[];
@@ -102,6 +111,9 @@ function computeRO(opts: ROCalcOptions): {
   totalCostYearly: number;
   personalDeductionMonthly: number;
   taxFreeAmountMonthly: number;
+  mealBenefitsYearly: number;
+  mealCassYearly: number;
+  mealTaxYearly: number;
 } {
   const { grossYearly, occupationRate, advanced } = opts;
   const cfg = RO_CONFIG;
@@ -110,14 +122,18 @@ function computeRO(opts: ROCalcOptions): {
   const employeeContribs: ContributionDetail[] = [];
   const employerContribs: ContributionDetail[] = [];
 
+  // --- Meal Benefits (tichete de masă) ---
+  const mealBenefitsYearly = (advanced.monthlyMealBenefits ?? 0) * 12;
+
   // --- Tax-free amount (minimum wage special rule) ---
   const taxFreeMonthly = getTaxFreeAmount(grossMonthly);
   const taxFreeYearly = taxFreeMonthly * 12;
 
-  // The contribution base is reduced by the tax-free amount
+  // The contribution base for CAS/CAM is reduced by the tax-free amount (salary only, no meals)
   const contributionBaseYearly = grossYearly - taxFreeYearly;
 
   // --- CAS (Social Security) - employee ---
+  // CAS is calculated on salary only – meal vouchers are EXEMPT (Art. 142 lit. r)
   const casAmount = round2(contributionBaseYearly * cfg.CAS.employee);
   employeeContribs.push({
     name: 'CAS (Social Security)',
@@ -127,16 +143,19 @@ function computeRO(opts: ROCalcOptions): {
   });
 
   // --- CASS (Health Insurance) - employee ---
-  const cassAmount = round2(contributionBaseYearly * cfg.CASS.employee);
+  // CASS includes meal vouchers in its base (since 2024/2025 reform)
+  // CASS base = (salary - taxFree) + meal vouchers
+  const cassBase = contributionBaseYearly + mealBenefitsYearly;
+  const cassAmount = round2(cassBase * cfg.CASS.employee);
   employeeContribs.push({
     name: 'CASS (Health Insurance)',
     rate: cfg.CASS.employee,
-    base: contributionBaseYearly,
+    base: cassBase,
     amount: cassAmount,
   });
 
   // --- CAM (Work Insurance) - employer ---
-  // CAM is also calculated on the contribution base (after tax-free deduction)
+  // CAM is on salary only – meal vouchers are EXEMPT (Art. 220^4 alin. 2)
   const camAmount = round2(contributionBaseYearly * cfg.CAM.employer);
   employerContribs.push({
     name: 'CAM (Work Insurance)',
@@ -156,10 +175,13 @@ function computeRO(opts: ROCalcOptions): {
   const personalDeductionYearly = personalDeductionMonthly * 12;
 
   // --- Income Tax ---
+  // Taxable base includes meal vouchers:
+  // taxableBase = (salary + meals - taxFree) - CAS - CASS - personalDeduction
+  // Note: CAS is only on salary, CASS is on salary+meals
+  const totalIncomeYearly = contributionBaseYearly + mealBenefitsYearly;
   const totalEmployeeContribsBeforeTax = casAmount + cassAmount;
 
-  // Taxable base = contribution base - employee contributions - personal deduction
-  let taxableBase = round2(contributionBaseYearly - totalEmployeeContribsBeforeTax - personalDeductionYearly);
+  let taxableBase = round2(totalIncomeYearly - totalEmployeeContribsBeforeTax - personalDeductionYearly);
   taxableBase = Math.max(taxableBase, 0);
 
   let incomeTax: number;
@@ -169,15 +191,24 @@ function computeRO(opts: ROCalcOptions): {
     incomeTax = round2(taxableBase * cfg.incomeTaxRate);
   }
 
+  // --- Meal voucher taxes (for reporting) ---
+  const mealCassYearly = mealBenefitsYearly > 0 ? round2(mealBenefitsYearly * cfg.CASS.employee) : 0;
+  // Meal income tax is harder to isolate exactly (it's part of the combined taxable base),
+  // but we can approximate it as 10% of the meal value for display purposes
+  const mealTaxYearly = mealBenefitsYearly > 0 ? round2(mealBenefitsYearly * cfg.incomeTaxRate) : 0;
+
   // --- Totals ---
   const totalEmployeeContribs = round2(totalEmployeeContribsBeforeTax + incomeTax);
   const totalEmployerContribs = round2(camAmount);
 
-  const netYearly = round2(grossYearly - totalEmployeeContribs);
-  const totalCostYearly = round2(grossYearly + totalEmployerContribs);
+  // Net = gross salary - all employee deductions + meal vouchers received
+  // The employee deductions already include CASS and tax on the meal vouchers
+  // (because CASS base and taxable base include meals), so the net formula is:
+  // net = gross + meals - (CAS + CASS_on_both + tax_on_both)
+  const netYearly = round2(grossYearly + mealBenefitsYearly - totalEmployeeContribs);
 
-  // Add meal benefits to net if applicable
-  const mealBenefitsYearly = (advanced.monthlyMealBenefits ?? 0) * 12;
+  // Total employer cost = gross salary + CAM + meal vouchers (employer pays nominal voucher value)
+  const totalCostYearly = round2(grossYearly + totalEmployerContribs + mealBenefitsYearly);
 
   return {
     employeeContribs,
@@ -186,10 +217,13 @@ function computeRO(opts: ROCalcOptions): {
     totalEmployerContribs,
     taxableBase,
     incomeTax,
-    netYearly: round2(netYearly + mealBenefitsYearly),
-    totalCostYearly: round2(totalCostYearly + mealBenefitsYearly),
+    netYearly,
+    totalCostYearly,
     personalDeductionMonthly,
     taxFreeAmountMonthly: taxFreeMonthly,
+    mealBenefitsYearly,
+    mealCassYearly,
+    mealTaxYearly,
   };
 }
 

@@ -25,6 +25,73 @@ const DEFAULT_DEDUCTIONS = [
 // Monthly ceiling for AC and AANP base (annual 148'200 / 12 = 12'350)
 const AC_AANP_MONTHLY_CAP = 12350;
 
+// AAC rate: applied on full gross when gross > 12'350
+const AAC_RATE = 0.092; // 0.092%
+
+// --- LPP age-band plan constants (same as Employee mode CH) ---
+const LPP_ENTRY_THRESHOLD_YEARLY = 22050;
+const LPP_PLAN_CEILING_YEARLY = 300000;
+const LPP_COORDINATION_DEDUCTION_YEARLY = 26460;
+
+const LPP_AGE_BANDS = [
+  { minAge: 18, maxAge: 24, totalRate: 0.012, label: '18–24 yrs: 1.2%' },
+  { minAge: 25, maxAge: 34, totalRate: 0.084, label: '25–34 yrs: 8.4%' },
+  { minAge: 35, maxAge: 44, totalRate: 0.116, label: '35–44 yrs: 11.6%' },
+  { minAge: 45, maxAge: 54, totalRate: 0.169, label: '45–54 yrs: 16.9%' },
+  { minAge: 55, maxAge: 65, totalRate: 0.204, label: '55–65 yrs: 20.4%' },
+];
+
+type LPPMode = 'MANUAL' | 'AUTO';
+
+/** Compute employee age in whole years from a date-of-birth string (YYYY-MM-DD). */
+function computeAge(dob: string): number | null {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  if (isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+/** Get the LPP total rate for a given age, or 0 if outside bands. */
+function getLPPTotalRate(age: number): number {
+  for (const band of LPP_AGE_BANDS) {
+    if (age >= band.minAge && age <= band.maxAge) return band.totalRate;
+  }
+  return 0;
+}
+
+/** Get the LPP age-band label for display. */
+function getLPPBandLabel(age: number): string {
+  for (const band of LPP_AGE_BANDS) {
+    if (age >= band.minAge && age <= band.maxAge) return band.label;
+  }
+  if (age < 18) return 'Below LPP age';
+  return 'Above LPP age';
+}
+
+/** Compute the monthly LPP employee deduction using the age-band plan.
+ *  grossMonthly = monthly gross salary
+ *  age = employee age in years
+ *  Returns the employee's 50% share of the total LPP contribution, monthly. */
+function computeLPPAutoMonthly(grossMonthly: number, age: number): { amount: number; rate: number; insuredSalaryMonthly: number } | null {
+  const grossYearly = grossMonthly * 12;
+  if (grossYearly < LPP_ENTRY_THRESHOLD_YEARLY) return null;
+  const totalRate = getLPPTotalRate(age);
+  if (totalRate <= 0) return null;
+  const cappedYearly = Math.min(grossYearly, LPP_PLAN_CEILING_YEARLY);
+  const insuredSalaryYearly = Math.max(cappedYearly - LPP_COORDINATION_DEDUCTION_YEARLY, 0);
+  if (insuredSalaryYearly <= 0) return null;
+  // Employee's share = 50% of total
+  const halfRate = totalRate / 2;
+  const yearlyAmount = Math.round(insuredSalaryYearly * halfRate * 100) / 100;
+  const monthlyAmount = Math.round(yearlyAmount / 12 * 100) / 100;
+  const insuredSalaryMonthly = Math.round(insuredSalaryYearly / 12 * 100) / 100;
+  return { amount: monthlyAmount, rate: halfRate, insuredSalaryMonthly };
+}
+
 interface DeductionInput {
   code: string;
   label: string;
@@ -42,9 +109,12 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
 
   const [grossMonthlySalary, setGrossMonthlySalary] = useState<string>(saved?.grossMonthlySalary || '10000');
   const [currency, setCurrency] = useState<string>(saved?.currency || 'CHF');
-  const [lppEmployeeAmount, setLppEmployeeAmount] = useState<string>(saved?.lppEmployeeAmount || '0');
   const [payPeriod, setPayPeriod] = useState<string>(saved?.payPeriod || new Date().toISOString().slice(0, 7));
   const [companyName, setCompanyName] = useState<string>(saved?.companyName || 'Technology Staffing Group SA');
+
+  // LPP mode: manual or auto-calculated from DOB
+  const [lppMode, setLppMode] = useState<LPPMode>(saved?.lppMode || 'MANUAL');
+  const [lppEmployeeAmount, setLppEmployeeAmount] = useState<string>(saved?.lppEmployeeAmount || '0');
 
   // Editable deduction rates
   const [deductions, setDeductions] = useState<DeductionInput[]>(
@@ -60,12 +130,15 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
 
   const [result, setResult] = useState<PayslipResult | null>(null);
 
+  // Computed age from identity DOB
+  const employeeAge = computeAge(identity.dateOfBirth);
+
   // Persist inputs
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      grossMonthlySalary, currency, lppEmployeeAmount, payPeriod, companyName, deductions, alignmentCurrency,
+      grossMonthlySalary, currency, lppEmployeeAmount, lppMode, payPeriod, companyName, deductions, alignmentCurrency,
     }));
-  }, [grossMonthlySalary, currency, lppEmployeeAmount, payPeriod, companyName, deductions, alignmentCurrency]);
+  }, [grossMonthlySalary, currency, lppEmployeeAmount, lppMode, payPeriod, companyName, deductions, alignmentCurrency]);
 
   const updateDeductionRate = (code: string, rate: string) => {
     setDeductions(deductions.map(d => d.code === code ? { ...d, rate } : d));
@@ -95,16 +168,47 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
       };
     });
 
-    const lpp = Number(lppEmployeeAmount) || 0;
-    if (lpp > 0) {
+    // AAC (Assurance Accidents Complémentaire): only when gross > 12'350
+    if (gross > AC_AANP_MONTHLY_CAP) {
+      const aacAmount = Math.round(gross * AAC_RATE / 100 * 100) / 100;
       lines.push({
-        code: 'LPP',
-        label: 'LPP/BVG Pension',
+        code: 'AAC',
+        label: 'Accidents Complémentaire',
         base: gross,
-        rate: 0,
-        amount: lpp,
-        isManual: true,
+        rate: AAC_RATE,
+        amount: aacAmount,
+        isManual: false,
       });
+    }
+
+    // LPP: manual or auto
+    if (lppMode === 'MANUAL') {
+      const lpp = Number(lppEmployeeAmount) || 0;
+      if (lpp > 0) {
+        lines.push({
+          code: 'LPP',
+          label: 'LPP/BVG Pension',
+          base: gross,
+          rate: 0,
+          amount: lpp,
+          isManual: true,
+        });
+      }
+    } else {
+      // AUTO: compute from DOB
+      if (employeeAge !== null && employeeAge >= 18) {
+        const lppCalc = computeLPPAutoMonthly(gross, employeeAge);
+        if (lppCalc) {
+          lines.push({
+            code: 'LPP',
+            label: `LPP/BVG Pension (${getLPPBandLabel(employeeAge)})`,
+            base: lppCalc.insuredSalaryMonthly,
+            rate: Math.round(lppCalc.rate * 100 * 1000) / 1000, // as percentage for display
+            amount: lppCalc.amount,
+            isManual: false,
+          });
+        }
+      }
     }
 
     const totalDeductions = Math.round(lines.reduce((s, l) => s + l.amount, 0) * 100) / 100;
@@ -117,12 +221,12 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
       netSalary,
       currency,
     });
-  }, [grossMonthlySalary, currency, lppEmployeeAmount, deductions]);
+  }, [grossMonthlySalary, currency, lppEmployeeAmount, lppMode, deductions, employeeAge]);
 
   // Auto-calculate on input change
   useEffect(() => {
     if (Number(grossMonthlySalary) > 0) calculate();
-  }, [grossMonthlySalary, currency, lppEmployeeAmount, deductions, calculate]);
+  }, [grossMonthlySalary, currency, lppEmployeeAmount, lppMode, deductions, calculate]);
 
   const rates = fxData?.rates || {};
   const av = (amt: number) => (
@@ -138,6 +242,11 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
       return `${months[Number(m) - 1]} ${y}`;
     } catch { return p; }
   };
+
+  // LPP auto preview values (for the input panel display)
+  const lppAutoPreview = (lppMode === 'AUTO' && employeeAge !== null && employeeAge >= 18)
+    ? computeLPPAutoMonthly(Number(grossMonthlySalary), employeeAge)
+    : null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -178,20 +287,69 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
             min={0}
             help="The gross monthly salary before deductions."
           />
-          <InputField
-            label="LPP/BVG Employee Amount (manual)"
-            value={lppEmployeeAmount}
-            onChange={setLppEmployeeAmount}
-            suffix={currency}
-            min={0}
-            help="LPP pension contribution entered manually. Added to total deductions as-is."
+          {/* AAC info notice */}
+          {Number(grossMonthlySalary) > AC_AANP_MONTHLY_CAP && (
+            <p className="text-[11px] text-blue-600 -mt-1">
+              Gross &gt; {fmt(AC_AANP_MONTHLY_CAP)}: AAC (Accidents Compl&eacute;mentaire) at {AAC_RATE}% will be added automatically.
+            </p>
+          )}
+        </Card>
+
+        {/* LPP Pension Section */}
+        <Card title="LPP/BVG Pension Contribution">
+          <SelectField
+            label="LPP Mode"
+            value={lppMode}
+            onChange={(v) => setLppMode(v as LPPMode)}
+            options={[
+              { value: 'MANUAL', label: 'Manual entry' },
+              { value: 'AUTO', label: 'Auto-calculate from Date of Birth' },
+            ]}
+            help="Choose whether to enter the LPP amount manually or calculate it automatically using the Swiss age-band plan."
           />
+          {lppMode === 'MANUAL' && (
+            <InputField
+              label="LPP/BVG Employee Amount"
+              value={lppEmployeeAmount}
+              onChange={setLppEmployeeAmount}
+              suffix={currency}
+              min={0}
+              help="Employee's monthly LPP pension contribution. Added to total deductions as-is."
+            />
+          )}
+          {lppMode === 'AUTO' && (
+            <div className="space-y-2">
+              {!identity.dateOfBirth ? (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                  Please enter Date of Birth in Employee Details below to calculate LPP automatically.
+                </p>
+              ) : employeeAge !== null ? (
+                <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                  <div><strong>Age:</strong> {employeeAge} years &mdash; <strong>LPP band:</strong> {getLPPBandLabel(employeeAge)}</div>
+                  {lppAutoPreview ? (
+                    <div className="mt-1">
+                      <strong>Insured salary:</strong> {fmt(lppAutoPreview.insuredSalaryMonthly)} {currency}/month &mdash;
+                      <strong> Employee share:</strong> {(lppAutoPreview.rate * 100).toFixed(2)}% = <strong>{fmt(lppAutoPreview.amount)} {currency}</strong>
+                    </div>
+                  ) : (
+                    <div className="mt-1 text-amber-600">Salary below LPP entry threshold or age outside LPP range &mdash; no LPP contribution.</div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          )}
         </Card>
 
         {/* Employee Identity */}
         <Card>
           <button onClick={() => setShowIdentity(!showIdentity)} className="flex items-center justify-between w-full text-sm font-medium text-gray-600 hover:text-gray-800">
-            <span>Employee Details (optional)</span>
+            <span>
+              Employee Details
+              {lppMode === 'AUTO' && !identity.dateOfBirth
+                ? <span className="text-red-500 ml-1 text-xs">(DOB required for auto LPP)</span>
+                : ' (optional)'}
+            </span>
             <span className={`transform transition-transform ${showIdentity ? 'rotate-180' : ''}`}>&#9660;</span>
           </button>
           {showIdentity && <div className="mt-4"><EmployeeIdentityFields identity={identity} onChange={onIdentityChange} /></div>}
@@ -296,7 +454,8 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
               {/* Cap notice */}
               {result.grossMonthlySalary > AC_AANP_MONTHLY_CAP && (
                 <p className="text-[10px] text-amber-600 mb-2">
-                  AC &amp; AANP base capped at {fmt(AC_AANP_MONTHLY_CAP)} {currency} (annual ceiling 148&apos;200 / 12)
+                  AC &amp; AANP base capped at {fmt(AC_AANP_MONTHLY_CAP)} {currency} (annual ceiling 148&apos;200 / 12).
+                  AAC applied on full gross.
                 </p>
               )}
               <div className="overflow-x-auto">

@@ -23,7 +23,10 @@ router.post('/calculate/employee', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid calculation_basis. Must be NET, GROSS, or TOTAL_COST.' });
     }
     if (!input.amount || input.amount <= 0) {
-      return res.status(400).json({ error: 'Amount must be greater than 0.' });
+      // Allow amount=0 when TOTAL_COST with clientDailyRate (cost envelope mode)
+      if (!(input.calculationBasis === 'TOTAL_COST' && input.clientDailyRate && input.clientDailyRate > 0)) {
+        return res.status(400).json({ error: 'Amount must be greater than 0.' });
+      }
     }
 
     const result = calculateEmployee({
@@ -33,8 +36,11 @@ router.post('/calculate/employee', async (req: Request, res: Response) => {
       amount: Number(input.amount),
       occupationRate: Number(input.occupationRate ?? 100),
       advancedOptions: input.advancedOptions,
-      clientDailyRate: input.clientDailyRate ? Number(input.clientDailyRate) : undefined,
       employeeAge: input.employeeAge !== undefined ? Number(input.employeeAge) : undefined,
+      // TOTAL_COST cost envelope fields
+      clientDailyRate: input.clientDailyRate ? Number(input.clientDailyRate) : undefined,
+      marginPercent: input.marginPercent !== undefined ? Number(input.marginPercent) : undefined,
+      workingDaysPerYear: input.workingDaysPerYear ? Number(input.workingDaysPerYear) : undefined,
     });
 
     res.json({ success: true, data: result });

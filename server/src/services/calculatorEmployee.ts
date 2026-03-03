@@ -9,6 +9,9 @@ import {
   CHAdvancedOptions,
   ROAdvancedOptions,
   ESAdvancedOptions,
+  CH_CONFIG,
+  RO_CONFIG,
+  ES_CONFIG,
 } from '../config/countries';
 import { round2 } from '../utils/math';
 import {
@@ -27,8 +30,116 @@ import {
   calculateESFromTotalCost,
 } from './calculatorES';
 
+// ============================================================
+// Cost Envelope: compute Total Employer Cost from client rate
+// ============================================================
+// When calculationBasis = 'TOTAL_COST' and clientDailyRate is provided:
+//   1. Working days = workingDaysPerYear × (occupationRate / 100)
+//   2. Annual Revenue = clientDailyRate × working days
+//   3. Margin = Annual Revenue × (marginPercent / 100)
+//   4. Total Employer Cost = Annual Revenue - Margin
+// This cost envelope is then fed into the existing TOTAL_COST
+// reverse calculation to find the maximum gross/net salary.
+// ============================================================
+
+function computeCostEnvelope(input: EmployeeInput): {
+  totalCostYearly: number;
+  envelope: NonNullable<EmployeeResult['costEnvelope']>;
+} {
+  const { clientDailyRate, marginPercent, workingDaysPerYear, occupationRate, country } = input;
+
+  if (!clientDailyRate || clientDailyRate <= 0) {
+    throw new Error('Client Daily Rate must be greater than 0 for TOTAL_COST calculation.');
+  }
+
+  const margin = marginPercent ?? 30; // default 30%
+  if (margin < 0 || margin >= 100) {
+    throw new Error('Margin must be between 0% and 99%.');
+  }
+
+  // Default working days from country config
+  const defaultWD =
+    country === 'CH' ? CH_CONFIG.workingDaysPerYear :
+    country === 'RO' ? RO_CONFIG.workingDaysPerYear :
+    ES_CONFIG.workingDaysPerYear;
+
+  const baseWorkingDays = workingDaysPerYear ?? defaultWD;
+
+  // Apply occupation rate to working days
+  const occFactor = (occupationRate ?? 100) / 100;
+  const effectiveWorkingDays = round2(baseWorkingDays * occFactor);
+
+  const annualRevenue = round2(clientDailyRate * effectiveWorkingDays);
+  const marginAmount = round2(annualRevenue * (margin / 100));
+  const totalCostYearly = round2(annualRevenue - marginAmount);
+  const dailyCostRate = effectiveWorkingDays > 0 ? round2(totalCostYearly / effectiveWorkingDays) : 0;
+  const dailyMargin = effectiveWorkingDays > 0 ? round2(marginAmount / effectiveWorkingDays) : 0;
+
+  return {
+    totalCostYearly,
+    envelope: {
+      clientDailyRate,
+      marginPercent: margin,
+      workingDays: effectiveWorkingDays,
+      annualRevenue,
+      marginAmount,
+      totalEmployerCostEnvelope: totalCostYearly,
+      dailyCostRate,
+      dailyMargin,
+    },
+  };
+}
+
 export function calculateEmployee(input: EmployeeInput): EmployeeResult {
-  const { country, calculationBasis, period, amount, occupationRate, advancedOptions, clientDailyRate, employeeAge } = input;
+  const { country, calculationBasis, period, amount, occupationRate, advancedOptions, employeeAge } = input;
+
+  // ============================================================
+  // TOTAL_COST with client rate: compute cost envelope first
+  // ============================================================
+  if (calculationBasis === 'TOTAL_COST' && input.clientDailyRate && input.clientDailyRate > 0) {
+    const { totalCostYearly, envelope } = computeCostEnvelope(input);
+
+    let result: EmployeeResult;
+
+    switch (country) {
+      case 'CH': {
+        const advanced = (advancedOptions ?? {}) as CHAdvancedOptions;
+        if (employeeAge !== undefined) advanced.employeeAge = employeeAge;
+        result = calculateCHFromTotalCost(totalCostYearly, occupationRate, advanced);
+        break;
+      }
+      case 'RO': {
+        const advanced = (advancedOptions ?? {}) as ROAdvancedOptions;
+        result = calculateROFromTotalCost(totalCostYearly, occupationRate, advanced);
+        break;
+      }
+      case 'ES': {
+        const advanced = (advancedOptions ?? {}) as ESAdvancedOptions;
+        result = calculateESFromTotalCost(totalCostYearly, occupationRate, advanced);
+        break;
+      }
+      default:
+        throw new Error(`Unsupported country: ${country}`);
+    }
+
+    // Override dailyRate to use the effective working days from the envelope
+    if (envelope.workingDays > 0) {
+      result.dailyRate = round2(result.totalEmployerCostYearly / envelope.workingDays);
+    }
+
+    // Attach the cost envelope to the result
+    result.costEnvelope = envelope;
+
+    // FTE references are from the envelope
+    result.fteAmountYearly = totalCostYearly;
+    result.effectiveAmountYearly = totalCostYearly;
+
+    return result;
+  }
+
+  // ============================================================
+  // Standard flow: GROSS, NET, or TOTAL_COST (manual amount)
+  // ============================================================
 
   // Convert monthly to yearly if needed
   let yearlyAmount = period === 'MONTHLY' ? amount * 12 : amount;
@@ -44,10 +155,7 @@ export function calculateEmployee(input: EmployeeInput): EmployeeResult {
   switch (country) {
     case 'CH': {
       const advanced = (advancedOptions ?? {}) as CHAdvancedOptions;
-      // Inject employeeAge into advanced options for LPP age-band calculation
-      if (employeeAge !== undefined) {
-        advanced.employeeAge = employeeAge;
-      }
+      if (employeeAge !== undefined) advanced.employeeAge = employeeAge;
       switch (calculationBasis) {
         case 'GROSS':
           result = calculateCHFromGross(effectiveYearlyAmount, occupationRate, advanced);
@@ -107,11 +215,6 @@ export function calculateEmployee(input: EmployeeInput): EmployeeResult {
   // Store the original 100% FTE amount for reference
   result.fteAmountYearly = round2(yearlyAmount);
   result.effectiveAmountYearly = effectiveYearlyAmount;
-
-  // Add margin vs client daily rate if provided (legacy - kept for backwards compat)
-  if (clientDailyRate && clientDailyRate > 0) {
-    result.marginVsClientRate = round2(clientDailyRate - result.dailyRate);
-  }
 
   return result;
 }

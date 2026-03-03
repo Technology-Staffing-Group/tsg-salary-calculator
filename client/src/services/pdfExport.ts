@@ -107,11 +107,19 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
   const inputRows: string[][] = [
     ['Country', `${countryNames[result.country] || result.country} (${result.currency})`],
     ['Calculation Basis', inputs.calculationBasis],
-    ['Input Amount (100% FTE)', `${formatNum(inputs.amount)} ${result.currency} (${inputs.period})`],
     ['Occupation Rate', `${result.occupationRate}%`],
   ];
-  if (result.occupationRate < 100 && result.effectiveAmountYearly) {
-    inputRows.push(['Effective Amount (Yearly)', `${formatNum(result.effectiveAmountYearly)} ${result.currency}`]);
+
+  // For TOTAL_COST mode with cost envelope, show client rate details
+  if (inputs.calculationBasis === 'TOTAL_COST' && result.costEnvelope) {
+    inputRows.push(['Client Daily Rate', `${formatNum(result.costEnvelope.clientDailyRate)} ${result.currency}`]);
+    inputRows.push(['Margin on Sales', `${result.costEnvelope.marginPercent}%`]);
+    inputRows.push(['Working Days', `${result.costEnvelope.workingDays}`]);
+  } else {
+    inputRows.push(['Input Amount (100% FTE)', `${formatNum(inputs.amount)} ${result.currency} (${inputs.period})`]);
+    if (result.occupationRate < 100 && result.effectiveAmountYearly) {
+      inputRows.push(['Effective Amount (Yearly)', `${formatNum(result.effectiveAmountYearly)} ${result.currency}`]);
+    }
   }
 
   autoTable(doc, {
@@ -126,7 +134,35 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
 
   y = (doc as any).lastAutoTable.finalY + 8;
 
-  // Business Metrics
+  // Cost Envelope (TOTAL_COST mode with client rate)
+  if (result.costEnvelope) {
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Cost Envelope', 14, y);
+    y += 6;
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Client Daily Rate', `${formatNum(result.costEnvelope.clientDailyRate)} ${result.currency}`],
+        ['Working Days', `${result.costEnvelope.workingDays}`],
+        ['Annual Revenue', `${formatNum(result.costEnvelope.annualRevenue)} ${result.currency}`],
+        [`Margin (${result.costEnvelope.marginPercent}%)`, `${formatNum(result.costEnvelope.marginAmount)} ${result.currency}`],
+        ['Total Employer Cost Envelope', `${formatNum(result.costEnvelope.totalEmployerCostEnvelope)} ${result.currency}`],
+        ['Daily Cost Rate', `${formatNum(result.costEnvelope.dailyCostRate)} ${result.currency}`],
+        ['Daily Margin', `${formatNum(result.costEnvelope.dailyMargin)} ${result.currency}`],
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [46, 134, 193] },
+      styles: { fontSize: 9 },
+      margin: { left: 14, right: 14 },
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
+
+  // Business Metrics (GROSS/NET modes only)
   if (inputs.metrics) {
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');

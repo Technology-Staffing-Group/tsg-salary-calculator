@@ -12,6 +12,7 @@ export type RateType = 'DAILY' | 'HOURLY';
 export type AppMode = 'employee' | 'b2b' | 'allocation' | 'payslip';
 
 // --- Margin Input Type for Employee Mode ---
+// (Legacy - now only used for GROSS/NET modes)
 export type MarginInputType = 'NONE' | 'TARGET_MARGIN' | 'FIXED_DAILY';
 
 // --- Employee Identity (shared across modes) ---
@@ -43,12 +44,23 @@ export interface EmployeeResult {
   incomeTax?: number;
   incomeTaxMonthly?: number;
   dailyRate: number;
-  marginVsClientRate?: number;
   fteAmountYearly?: number;
   effectiveAmountYearly?: number;
   currency: string;
   country: CountryCode;
   occupationRate: number;
+
+  // --- Cost Envelope (populated when TOTAL_COST with client rate) ---
+  costEnvelope?: {
+    clientDailyRate: number;
+    marginPercent: number;
+    workingDays: number;
+    annualRevenue: number;
+    marginAmount: number;
+    totalEmployerCostEnvelope: number;
+    dailyCostRate: number;
+    dailyMargin: number;
+  };
 }
 
 export interface B2BResult {

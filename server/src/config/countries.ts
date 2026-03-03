@@ -164,8 +164,16 @@ export interface EmployeeInput {
   amount: number;
   occupationRate: number;
   advancedOptions?: AdvancedOptions;
-  clientDailyRate?: number;
   employeeAge?: number;  // Derived from DOB on frontend, passed for CH LPP calculation
+
+  // --- TOTAL_COST mode: cost envelope from client rate ---
+  // When calculationBasis = 'TOTAL_COST', these fields compute the cost envelope:
+  //   Revenue = clientDailyRate × effectiveWorkingDays
+  //   Margin  = Revenue × marginPercent / 100
+  //   Total Employer Cost = Revenue - Margin
+  clientDailyRate?: number;      // Daily rate charged to the client
+  marginPercent?: number;        // Margin on sales (e.g. 30 = 30%)
+  workingDaysPerYear?: number;   // Default 220, adjusted by occupation rate
 }
 
 export interface ContributionDetail {
@@ -190,7 +198,6 @@ export interface EmployeeResult {
   incomeTax?: number;
   incomeTaxMonthly?: number;
   dailyRate: number;
-  marginVsClientRate?: number;
   /** The original 100% FTE yearly amount entered by the user */
   fteAmountYearly?: number;
   /** The effective yearly amount after applying occupation rate */
@@ -198,4 +205,16 @@ export interface EmployeeResult {
   currency: string;
   country: CountryCode;
   occupationRate: number;
+
+  // --- Cost Envelope (populated when TOTAL_COST with client rate) ---
+  costEnvelope?: {
+    clientDailyRate: number;
+    marginPercent: number;
+    workingDays: number;           // Effective working days (220 × occRate%)
+    annualRevenue: number;         // clientDailyRate × workingDays
+    marginAmount: number;          // annualRevenue × marginPercent%
+    totalEmployerCostEnvelope: number; // annualRevenue - marginAmount
+    dailyCostRate: number;         // totalEmployerCostEnvelope / workingDays
+    dailyMargin: number;           // marginAmount / workingDays
+  };
 }

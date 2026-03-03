@@ -54,25 +54,45 @@ router.post('/calculate/b2b', async (req: Request, res: Response) => {
   try {
     const input = req.body;
 
-    if (!input.costRate || input.costRate <= 0) {
+    // CLIENT_BUDGET mode doesn't require costRate (it's derived from the budget)
+    if (input.pricingMode !== 'CLIENT_BUDGET' && (!input.costRate || input.costRate <= 0)) {
       return res.status(400).json({ error: 'Cost rate must be greater than 0.' });
     }
     if (!input.pricingMode || !['TARGET_MARGIN', 'CLIENT_RATE', 'CLIENT_BUDGET'].includes(input.pricingMode)) {
       return res.status(400).json({ error: 'Invalid pricing mode.' });
     }
 
+    // Fetch FX rates for min margin floor conversion (TARGET_MARGIN mode)
+    let fxRates: Record<string, number> | undefined;
+    if (input.pricingMode === 'TARGET_MARGIN') {
+      try {
+        const fx = await fetchFXRates();
+        fxRates = fx.rates;
+      } catch { /* use defaults if unavailable */ }
+    }
+
     const result = calculateB2B({
-      costRate: Number(input.costRate),
+      costRate: Number(input.costRate || 0),
       rateType: input.rateType || 'DAILY',
       costCurrency: input.costCurrency || 'CHF',
       pricingMode: input.pricingMode,
-      targetMarginPercent: input.targetMarginPercent ? Number(input.targetMarginPercent) : undefined,
+      // TARGET_MARGIN fields
+      targetMarginPercent: input.targetMarginPercent !== undefined ? Number(input.targetMarginPercent) : undefined,
+      minDailyMargin: input.minDailyMargin !== undefined ? Number(input.minDailyMargin) : undefined,
+      minDailyMarginCurrency: input.minDailyMarginCurrency || undefined,
+      // CLIENT_RATE fields
       clientRate: input.clientRate ? Number(input.clientRate) : undefined,
+      // CLIENT_BUDGET fields
       clientDailyRate: input.clientDailyRate ? Number(input.clientDailyRate) : undefined,
+      budgetMarginPercent: input.budgetMarginPercent !== undefined ? Number(input.budgetMarginPercent) : undefined,
+      socialMultiplier: input.socialMultiplier !== undefined ? Number(input.socialMultiplier) : undefined,
+      // Legacy compat
       clientBudget: input.clientBudget ? Number(input.clientBudget) : undefined,
       budgetDays: input.budgetDays ? Number(input.budgetDays) : undefined,
+      // Common
       hoursPerDay: input.hoursPerDay ? Number(input.hoursPerDay) : undefined,
       workingDaysPerYear: input.workingDaysPerYear ? Number(input.workingDaysPerYear) : undefined,
+      fxRates,
     });
 
     res.json({ success: true, data: result });

@@ -77,6 +77,23 @@ export interface B2BResult {
   annualCost: number;
   currency: string;
   pricingMode: PricingMode;
+
+  // --- TARGET_MARGIN: minimum margin floor ---
+  minMarginFloorApplied?: boolean;
+  minMarginFloorValue?: number;
+  originalClientRateDaily?: number;
+  originalMarginAmount?: number;
+  minMarginFloorExplanation?: string;
+
+  // --- CLIENT_BUDGET: breakdown ---
+  budgetBreakdown?: {
+    clientBudgetDaily: number;
+    budgetMarginPercent: number;
+    marginAmount: number;
+    employerCost: number;
+    socialMultiplier: number;
+    maxDailyRate: number;
+  };
 }
 
 export interface ClientResult {

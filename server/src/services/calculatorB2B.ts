@@ -13,15 +13,37 @@ export interface B2BInput {
   rateType: RateType;
   costCurrency: string;
   pricingMode: PricingMode;
+
+  // TARGET_MARGIN fields
   targetMarginPercent?: number;
+  /** Minimum daily margin floor in the working currency (default 120 CHF equivalent).
+   *  If the calculated margin is below this floor, the client rate is bumped to cost + floor. */
+  minDailyMargin?: number;
+  /** Currency in which minDailyMargin is expressed (default CHF). If the costCurrency differs,
+   *  the floor is converted using the FX rates provided. */
+  minDailyMarginCurrency?: string;
+
+  // CLIENT_RATE fields
   clientRate?: number;
-  /** For CLIENT_BUDGET mode: the daily rate the client pays */
+
+  // CLIENT_BUDGET fields
+  /** The daily rate the client pays (budget per day) */
   clientDailyRate?: number;
+  /** Margin on sales as % (e.g. 30 = 30%), default 30. Used in CLIENT_BUDGET mode. */
+  budgetMarginPercent?: number;
+  /** Social charges multiplier applied on top of employer cost to derive max daily rate.
+   *  Default 1.2 (i.e. 20% social charges on top). */
+  socialMultiplier?: number;
+
   /** @deprecated - replaced by clientDailyRate; kept for backwards compat */
   clientBudget?: number;
   budgetDays?: number;
+
   hoursPerDay?: number;
   workingDaysPerYear?: number;
+
+  /** FX rates (base RON) passed from the route for floor conversion */
+  fxRates?: Record<string, number>;
 }
 
 export interface B2BResult {
@@ -38,6 +60,49 @@ export interface B2BResult {
   annualCost: number;
   currency: string;
   pricingMode: PricingMode;
+
+  // --- TARGET_MARGIN: minimum margin floor ---
+  /** Whether the minimum daily margin floor was applied */
+  minMarginFloorApplied?: boolean;
+  /** The floor value in the working currency */
+  minMarginFloorValue?: number;
+  /** The originally computed client rate before the floor was applied */
+  originalClientRateDaily?: number;
+  /** The originally computed margin before the floor was applied */
+  originalMarginAmount?: number;
+  /** Human-readable explanation when the floor is applied */
+  minMarginFloorExplanation?: string;
+
+  // --- CLIENT_BUDGET: breakdown ---
+  budgetBreakdown?: {
+    clientBudgetDaily: number;
+    budgetMarginPercent: number;
+    marginAmount: number;
+    employerCost: number;
+    socialMultiplier: number;
+    maxDailyRate: number;
+  };
+}
+
+/**
+ * Convert the minimum daily margin floor from its source currency to the working currency.
+ */
+function convertFloor(
+  floorAmount: number,
+  floorCurrency: string,
+  targetCurrency: string,
+  fxRates?: Record<string, number>,
+): number {
+  if (floorCurrency === targetCurrency) return floorAmount;
+  if (!fxRates) return floorAmount; // No rates available, use as-is
+
+  const fromRate = fxRates[floorCurrency];
+  const toRate = fxRates[targetCurrency];
+  if (!fromRate || !toRate) return floorAmount;
+
+  // Convert via RON base: floor → RON → target
+  const inRON = floorAmount / fromRate;
+  return round2(inRON * toRate);
 }
 
 export function calculateB2B(input: B2BInput): B2BResult {
@@ -50,13 +115,41 @@ export function calculateB2B(input: B2BInput): B2BResult {
     : input.costRate;
 
   let clientRateDaily: number;
+  let minMarginFloorApplied = false;
+  let minMarginFloorValue: number | undefined;
+  let originalClientRateDaily: number | undefined;
+  let originalMarginAmount: number | undefined;
+  let minMarginFloorExplanation: string | undefined;
+  let budgetBreakdown: B2BResult['budgetBreakdown'] | undefined;
 
   switch (input.pricingMode) {
     case 'TARGET_MARGIN': {
       const marginPct = (input.targetMarginPercent ?? 0) / 100;
-      // clientRate = costRate / (1 - marginPct)
       if (marginPct >= 1) throw new Error('Margin percent must be less than 100%');
-      clientRateDaily = round2(costRateDaily / (1 - marginPct));
+
+      // Standard formula: clientRate = costRate / (1 - marginPct)
+      const calculatedClientRate = round2(costRateDaily / (1 - marginPct));
+      const calculatedMargin = round2(calculatedClientRate - costRateDaily);
+
+      // --- Minimum daily margin floor ---
+      const floorCurrency = input.minDailyMarginCurrency ?? 'CHF';
+      const rawFloor = input.minDailyMargin ?? 120; // default 120 CHF
+      const floorInWorkingCurrency = convertFloor(rawFloor, floorCurrency, input.costCurrency, input.fxRates);
+      minMarginFloorValue = round2(floorInWorkingCurrency);
+
+      if (calculatedMargin < floorInWorkingCurrency) {
+        // Floor kicks in: client rate = cost + floor
+        minMarginFloorApplied = true;
+        originalClientRateDaily = calculatedClientRate;
+        originalMarginAmount = calculatedMargin;
+        clientRateDaily = round2(costRateDaily + floorInWorkingCurrency);
+        minMarginFloorExplanation =
+          `Minimum daily margin of ${round2(floorInWorkingCurrency)} ${input.costCurrency} applied. ` +
+          `The calculated margin (${round2(calculatedMargin)} ${input.costCurrency} at ${input.targetMarginPercent ?? 0}%) ` +
+          `was below the floor. Client Daily Rate adjusted from ${round2(calculatedClientRate)} to ${round2(costRateDaily + floorInWorkingCurrency)} ${input.costCurrency}.`;
+      } else {
+        clientRateDaily = calculatedClientRate;
+      }
       break;
     }
 
@@ -68,17 +161,36 @@ export function calculateB2B(input: B2BInput): B2BResult {
     }
 
     case 'CLIENT_BUDGET': {
-      // New approach: accept clientDailyRate directly
-      if (input.clientDailyRate !== undefined && input.clientDailyRate > 0) {
-        clientRateDaily = input.clientDailyRate;
-      } else if (input.clientBudget !== undefined) {
-        // Backwards compat: old total budget / days approach
-        const budget = input.clientBudget;
-        const days = input.budgetDays ?? 1;
-        clientRateDaily = round2(budget / days);
-      } else {
-        clientRateDaily = 0;
-      }
+      // New logic:
+      //   Client Budget (daily) = what the client pays per day
+      //   Margin = budget × marginPercent%
+      //   Employer Cost = budget - margin
+      //   Max Daily Rate = Employer Cost / socialMultiplier
+      const budget = input.clientDailyRate ?? input.clientBudget ?? 0;
+      const budgetMargin = input.budgetMarginPercent ?? 30;
+      const socialMult = input.socialMultiplier ?? 1.2;
+
+      if (budget <= 0) throw new Error('Client Budget (Daily Rate) must be greater than 0.');
+      if (budgetMargin < 0 || budgetMargin >= 100) throw new Error('Budget margin must be between 0% and 99%.');
+      if (socialMult <= 0) throw new Error('Social multiplier must be greater than 0.');
+
+      const marginAmt = round2(budget * (budgetMargin / 100));
+      const employerCost = round2(budget - marginAmt);
+      const maxDailyRate = round2(employerCost / socialMult);
+
+      budgetBreakdown = {
+        clientBudgetDaily: budget,
+        budgetMarginPercent: budgetMargin,
+        marginAmount: marginAmt,
+        employerCost,
+        socialMultiplier: socialMult,
+        maxDailyRate,
+      };
+
+      // In CLIENT_BUDGET mode, the "client rate" is what the client pays (the budget),
+      // and the "cost rate" is the max daily rate the contractor can be paid.
+      // We override costRateDaily for margin computations below.
+      clientRateDaily = budget;
       break;
     }
 
@@ -86,21 +198,29 @@ export function calculateB2B(input: B2BInput): B2BResult {
       throw new Error(`Unknown pricing mode: ${input.pricingMode}`);
   }
 
-  const marginAmount = round2(clientRateDaily - costRateDaily);
+  // --- Compute margin metrics ---
+  // For CLIENT_BUDGET mode, the "cost" for margin purposes is the max daily rate (what we pay the contractor)
+  const effectiveCostDaily = input.pricingMode === 'CLIENT_BUDGET' && budgetBreakdown
+    ? budgetBreakdown.maxDailyRate
+    : costRateDaily;
+
+  const marginAmount = round2(clientRateDaily - effectiveCostDaily);
   const marginPercent = clientRateDaily > 0
     ? round2((marginAmount / clientRateDaily) * 100)
     : 0;
-  const markupPercent = costRateDaily > 0
-    ? round2((marginAmount / costRateDaily) * 100)
+  const markupPercent = effectiveCostDaily > 0
+    ? round2((marginAmount / effectiveCostDaily) * 100)
     : 0;
 
   const annualRevenue = round2(clientRateDaily * workingDays);
-  const annualCost = round2(costRateDaily * workingDays);
+  const annualCost = round2(effectiveCostDaily * workingDays);
   const annualProfit = round2(annualRevenue - annualCost);
 
   return {
-    costRate: input.costRate,
-    costRateDaily,
+    costRate: input.pricingMode === 'CLIENT_BUDGET' && budgetBreakdown
+      ? budgetBreakdown.maxDailyRate
+      : input.costRate,
+    costRateDaily: effectiveCostDaily,
     clientRate: input.rateType === 'HOURLY'
       ? round2(clientRateDaily / hoursPerDay)
       : clientRateDaily,
@@ -114,5 +234,20 @@ export function calculateB2B(input: B2BInput): B2BResult {
     annualCost,
     currency: input.costCurrency,
     pricingMode: input.pricingMode,
+
+    // TARGET_MARGIN floor fields
+    ...(minMarginFloorApplied && {
+      minMarginFloorApplied,
+      minMarginFloorValue,
+      originalClientRateDaily,
+      originalMarginAmount,
+      minMarginFloorExplanation,
+    }),
+    ...(!minMarginFloorApplied && input.pricingMode === 'TARGET_MARGIN' && {
+      minMarginFloorValue,
+    }),
+
+    // CLIENT_BUDGET breakdown
+    ...(budgetBreakdown && { budgetBreakdown }),
   };
 }

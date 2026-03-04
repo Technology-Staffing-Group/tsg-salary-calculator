@@ -5,7 +5,6 @@
   "outputDirectory": "client/dist",
   "functions": {
     "api/index.js": {
-      "includesFiles": "server/dist/**",
       "maxDuration": 30
     }
   },

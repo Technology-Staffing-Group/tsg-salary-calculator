@@ -3,7 +3,7 @@ import { Card, InputField, SelectField, Button, Disclaimer, ResultRow, Spinner, 
 import EmployeeIdentityFields from './EmployeeIdentityFields';
 import AlignedCurrencyPanel, { AlignedValue } from './AlignedCurrencyPanel';
 import { api } from '../services/api';
-import { exportB2BPDF } from '../services/pdfExport';
+import { exportB2BPDF, PDFAlignedOptions } from '../services/pdfExport';
 import type { B2BResult, PricingMode, RateType, FXData, EmployeeIdentity } from '../types';
 
 const STORAGE_KEY = 'tsg_b2b_inputs';
@@ -252,7 +252,7 @@ export default function B2BMode({ fxData, identity, onIdentityChange }: Props) {
             {loading ? 'Calculating...' : 'Calculate'}
           </Button>
           {result && (
-            <Button variant="outline" onClick={() => exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity)}>
+            <Button variant="outline" onClick={() => exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined)}>
               Download PDF
             </Button>
           )}

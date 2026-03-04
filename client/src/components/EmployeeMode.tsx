@@ -6,7 +6,7 @@ import {
 import EmployeeIdentityFields from './EmployeeIdentityFields';
 import AlignedCurrencyPanel, { AlignedValue } from './AlignedCurrencyPanel';
 import { api } from '../services/api';
-import { exportEmployeePDF } from '../services/pdfExport';
+import { exportEmployeePDF, PDFAlignedOptions } from '../services/pdfExport';
 import type {
   EmployeeResult, CountryCode, CalculationBasis, Period,
   CHAdvancedOptions, ROAdvancedOptions, FXData, EmployeeIdentity, MarginInputType
@@ -375,7 +375,7 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
               occupationRate: Number(occRate), marginInputType, targetMarginPct: Number(targetMarginPct),
               fixedDailyAmount: Number(fixedDailyAmount), metrics,
               clientDailyRate: Number(clientDailyRate), marginPercent: Number(marginPercent), workingDays: Number(workingDays),
-            }, identity)}>
+            }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined)}>
               Download PDF
             </Button>
           )}

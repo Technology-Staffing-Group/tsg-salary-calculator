@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, InputField, SelectField, Button, Disclaimer, ResultRow, Spinner, ErrorAlert, HelpTip } from './UIComponents';
 import AlignedCurrencyPanel, { AlignedValue } from './AlignedCurrencyPanel';
 import { api } from '../services/api';
-import { exportAllocationPDF } from '../services/pdfExport';
+import { exportAllocationPDF, PDFAlignedOptions } from '../services/pdfExport';
 import type { AllocationResult, FXData } from '../types';
 
 const STORAGE_KEY = 'tsg_allocation_inputs';
@@ -243,7 +243,7 @@ export default function AllocationMode({ fxData }: Props) {
               salary100: Number(salary100),
               engagementPercent: Number(engagementPercent),
               employerMultiplier: Number(employerMultiplier),
-            })}>
+            }, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined)}>
               Download PDF
             </Button>
           )}

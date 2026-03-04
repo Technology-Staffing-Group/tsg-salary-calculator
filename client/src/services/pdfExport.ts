@@ -1,5 +1,6 @@
 // ============================================================
 // PDF Export Service - Generates professional PDFs for all modes
+// Supports aligned (dual) currency display when toggled on
 // ============================================================
 
 import jsPDF from 'jspdf';
@@ -8,8 +9,44 @@ import type { EmployeeResult, B2BResult, AllocationResult, PayslipResult, Employ
 
 const DISCLAIMER = 'This calculator provides estimates based on current tax rules and rates. Results are for planning only and must be validated by a tax professional.';
 
+// ============================================================
+// Aligned currency options passed to all PDF exports
+// ============================================================
+export interface PDFAlignedOptions {
+  /** Whether the user toggled "Show aligned results" on */
+  showAligned: boolean;
+  /** The target currency to convert to (e.g. 'EUR') */
+  alignmentCurrency: string;
+  /** FX rates (RON-based) from the FX service */
+  rates: Record<string, number>;
+}
+
+// ============================================================
+// Helpers
+// ============================================================
+
 function formatNum(n: number): string {
   return n.toLocaleString('en-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function convertAmt(amount: number, from: string, to: string, rates: Record<string, number>): number {
+  if (from === to) return amount;
+  const fromRate = rates[from];
+  const toRate = rates[to];
+  if (!fromRate || !toRate) return amount;
+  return Math.round((amount / fromRate) * toRate * 100) / 100;
+}
+
+/** Format a value in base currency, and optionally append the aligned currency */
+function fmtDual(
+  amount: number,
+  baseCurrency: string,
+  aligned?: { show: boolean; currency: string; rates: Record<string, number> }
+): string {
+  const base = `${formatNum(amount)} ${baseCurrency}`;
+  if (!aligned || !aligned.show || baseCurrency === aligned.currency) return base;
+  const converted = convertAmt(amount, baseCurrency, aligned.currency, aligned.rates);
+  return `${base}  (${formatNum(converted)} ${aligned.currency})`;
 }
 
 function addHeader(doc: jsPDF, title: string) {
@@ -59,6 +96,20 @@ function addDisclaimer(doc: jsPDF, y: number) {
   return y + 20;
 }
 
+/** Add FX rate note when aligned currency is shown */
+function addFXNote(doc: jsPDF, y: number, baseCurrency: string, aligned: { currency: string; rates: Record<string, number> }): number {
+  const fromRate = aligned.rates[baseCurrency];
+  const toRate = aligned.rates[aligned.currency];
+  if (!fromRate || !toRate) return y;
+  const rate = Math.round((toRate / fromRate) * 10000) / 10000;
+
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'italic');
+  doc.setTextColor(100, 80, 170);
+  doc.text(`Exchange rate: 1 ${baseCurrency} = ${rate.toFixed(4)} ${aligned.currency} (indicative, as of report date)`, 14, y);
+  return y + 6;
+}
+
 /** Add employee identity section to PDF if fields are filled */
 function addIdentitySection(doc: jsPDF, y: number, identity?: EmployeeIdentity): number {
   if (!identity) return y;
@@ -90,9 +141,28 @@ function addIdentitySection(doc: jsPDF, y: number, identity?: EmployeeIdentity):
 
 const countryNames: Record<string, string> = { CH: 'Switzerland', RO: 'Romania', ES: 'Spain' };
 
-export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?: EmployeeIdentity) {
+// ============================================================
+// EMPLOYEE MODE PDF
+// ============================================================
+
+export function exportEmployeePDF(
+  result: EmployeeResult,
+  inputs: any,
+  identity?: EmployeeIdentity,
+  alignedOptions?: PDFAlignedOptions,
+) {
   const doc = new jsPDF();
+  const cur = result.currency;
+  const aligned = alignedOptions?.showAligned && alignedOptions.alignmentCurrency !== cur
+    ? { show: true, currency: alignedOptions.alignmentCurrency, rates: alignedOptions.rates }
+    : undefined;
+
   let y = addHeader(doc, 'Employee Mode - Salary Calculation');
+
+  // FX rate note
+  if (aligned) {
+    y = addFXNote(doc, y, cur, aligned);
+  }
 
   // Employee Identity
   y = addIdentitySection(doc, y, identity);
@@ -105,21 +175,24 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
   y += 6;
 
   const inputRows: string[][] = [
-    ['Country', `${countryNames[result.country] || result.country} (${result.currency})`],
+    ['Country', `${countryNames[result.country] || result.country} (${cur})`],
     ['Calculation Basis', inputs.calculationBasis],
     ['Occupation Rate', `${result.occupationRate}%`],
   ];
 
-  // For TOTAL_COST mode with cost envelope, show client rate details
   if (inputs.calculationBasis === 'TOTAL_COST' && result.costEnvelope) {
-    inputRows.push(['Client Daily Rate', `${formatNum(result.costEnvelope.clientDailyRate)} ${result.currency}`]);
+    inputRows.push(['Client Daily Rate', fmtDual(result.costEnvelope.clientDailyRate, cur, aligned)]);
     inputRows.push(['Margin on Sales', `${result.costEnvelope.marginPercent}%`]);
     inputRows.push(['Working Days', `${result.costEnvelope.workingDays}`]);
   } else {
-    inputRows.push(['Input Amount (100% FTE)', `${formatNum(inputs.amount)} ${result.currency} (${inputs.period})`]);
+    inputRows.push(['Input Amount (100% FTE)', `${formatNum(inputs.amount)} ${cur} (${inputs.period})`]);
     if (result.occupationRate < 100 && result.effectiveAmountYearly) {
-      inputRows.push(['Effective Amount (Yearly)', `${formatNum(result.effectiveAmountYearly)} ${result.currency}`]);
+      inputRows.push(['Effective Amount (Yearly)', fmtDual(result.effectiveAmountYearly, cur, aligned)]);
     }
+  }
+
+  if (aligned) {
+    inputRows.push(['Aligned Currency', aligned.currency]);
   }
 
   autoTable(doc, {
@@ -145,13 +218,13 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
       startY: y,
       head: [['Metric', 'Value']],
       body: [
-        ['Client Daily Rate', `${formatNum(result.costEnvelope.clientDailyRate)} ${result.currency}`],
+        ['Client Daily Rate', fmtDual(result.costEnvelope.clientDailyRate, cur, aligned)],
         ['Working Days', `${result.costEnvelope.workingDays}`],
-        ['Annual Revenue', `${formatNum(result.costEnvelope.annualRevenue)} ${result.currency}`],
-        [`Margin (${result.costEnvelope.marginPercent}%)`, `${formatNum(result.costEnvelope.marginAmount)} ${result.currency}`],
-        ['Total Employer Cost Envelope', `${formatNum(result.costEnvelope.totalEmployerCostEnvelope)} ${result.currency}`],
-        ['Daily Cost Rate', `${formatNum(result.costEnvelope.dailyCostRate)} ${result.currency}`],
-        ['Daily Margin', `${formatNum(result.costEnvelope.dailyMargin)} ${result.currency}`],
+        ['Annual Revenue', fmtDual(result.costEnvelope.annualRevenue, cur, aligned)],
+        [`Margin (${result.costEnvelope.marginPercent}%)`, fmtDual(result.costEnvelope.marginAmount, cur, aligned)],
+        ['Total Employer Cost Envelope', fmtDual(result.costEnvelope.totalEmployerCostEnvelope, cur, aligned)],
+        ['Daily Cost Rate', fmtDual(result.costEnvelope.dailyCostRate, cur, aligned)],
+        ['Daily Margin', fmtDual(result.costEnvelope.dailyMargin, cur, aligned)],
       ],
       theme: 'grid',
       headStyles: { fillColor: [46, 134, 193] },
@@ -170,14 +243,14 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
     y += 6;
 
     const metricsBody: string[][] = [
-      ['Daily Cost Rate', `${formatNum(inputs.metrics.dailyCostRate)} ${result.currency}`],
+      ['Daily Cost Rate', fmtDual(inputs.metrics.dailyCostRate, cur, aligned)],
     ];
     if (inputs.metrics.dailyPlacementRate !== undefined) {
       const label = inputs.marginInputType === 'FIXED_DAILY' ? 'Daily Placement Rate (Fixed)' : 'Daily Placement Rate';
-      metricsBody.push([label, `${formatNum(inputs.metrics.dailyPlacementRate)} ${result.currency}`]);
+      metricsBody.push([label, fmtDual(inputs.metrics.dailyPlacementRate, cur, aligned)]);
     }
     if (inputs.metrics.dailyRevenue !== undefined) {
-      metricsBody.push(['Daily Revenue', `${formatNum(inputs.metrics.dailyRevenue)} ${result.currency}`]);
+      metricsBody.push(['Daily Revenue', fmtDual(inputs.metrics.dailyRevenue, cur, aligned)]);
     }
     if (inputs.metrics.marginPct !== undefined) {
       metricsBody.push(['Margin %', `${inputs.metrics.marginPct.toFixed(1)}%`]);
@@ -209,9 +282,9 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
     startY: y,
     head: [['', 'Monthly', 'Yearly']],
     body: [
-      ['Gross Salary', `${formatNum(result.grossSalaryMonthly)} ${result.currency}`, `${formatNum(result.grossSalaryYearly)} ${result.currency}`],
-      ['Net Salary', `${formatNum(result.netSalaryMonthly)} ${result.currency}`, `${formatNum(result.netSalaryYearly)} ${result.currency}`],
-      ['Total Employer Cost', `${formatNum(result.totalEmployerCostMonthly)} ${result.currency}`, `${formatNum(result.totalEmployerCostYearly)} ${result.currency}`],
+      ['Gross Salary', fmtDual(result.grossSalaryMonthly, cur, aligned), fmtDual(result.grossSalaryYearly, cur, aligned)],
+      ['Net Salary', fmtDual(result.netSalaryMonthly, cur, aligned), fmtDual(result.netSalaryYearly, cur, aligned)],
+      ['Total Employer Cost', fmtDual(result.totalEmployerCostMonthly, cur, aligned), fmtDual(result.totalEmployerCostYearly, cur, aligned)],
     ],
     theme: 'grid',
     headStyles: { fillColor: [214, 0, 28] },
@@ -235,11 +308,11 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
         ...result.employeeContributions.map(c => [
           c.name,
           `${(c.rate * 100).toFixed(2)}%`,
-          `${formatNum(c.base / 12)} ${result.currency}`,
-          `${formatNum(c.amount / 12)} ${result.currency}`,
+          fmtDual(c.base / 12, cur, aligned),
+          fmtDual(c.amount / 12, cur, aligned),
         ]),
-        ...(result.incomeTax !== undefined ? [['Income Tax', `${result.country === 'RO' ? '10%' : 'Progressive'}`, `${formatNum((result.taxableBase || 0) / 12)} ${result.currency}`, `${formatNum(result.incomeTax / 12)} ${result.currency}`]] : []),
-        ['TOTAL', '', '', `${formatNum(result.totalEmployeeContributions / 12)} ${result.currency}`],
+        ...(result.incomeTax !== undefined ? [['Income Tax', `${result.country === 'RO' ? '10%' : 'Progressive'}`, fmtDual((result.taxableBase || 0) / 12, cur, aligned), fmtDual(result.incomeTax / 12, cur, aligned)]] : []),
+        ['TOTAL', '', '', fmtDual(result.totalEmployeeContributions / 12, cur, aligned)],
       ],
       theme: 'grid',
       headStyles: { fillColor: [100, 100, 100] },
@@ -264,10 +337,10 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
         ...result.employerContributions.map(c => [
           c.name,
           `${(c.rate * 100).toFixed(3)}%`,
-          `${formatNum(c.base / 12)} ${result.currency}`,
-          `${formatNum(c.amount / 12)} ${result.currency}`,
+          fmtDual(c.base / 12, cur, aligned),
+          fmtDual(c.amount / 12, cur, aligned),
         ]),
-        ['TOTAL', '', '', `${formatNum(result.totalEmployerContributions / 12)} ${result.currency}`],
+        ['TOTAL', '', '', fmtDual(result.totalEmployerContributions / 12, cur, aligned)],
       ],
       theme: 'grid',
       headStyles: { fillColor: [100, 100, 100] },
@@ -295,9 +368,28 @@ export function exportEmployeePDF(result: EmployeeResult, inputs: any, identity?
   doc.save(`TSG_Employee_${result.country}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
-export function exportB2BPDF(result: B2BResult, inputs: any, identity?: EmployeeIdentity) {
+// ============================================================
+// B2B MODE PDF
+// ============================================================
+
+export function exportB2BPDF(
+  result: B2BResult,
+  inputs: any,
+  identity?: EmployeeIdentity,
+  alignedOptions?: PDFAlignedOptions,
+) {
   const doc = new jsPDF();
+  const cur = result.currency;
+  const aligned = alignedOptions?.showAligned && alignedOptions.alignmentCurrency !== cur
+    ? { show: true, currency: alignedOptions.alignmentCurrency, rates: alignedOptions.rates }
+    : undefined;
+
   let y = addHeader(doc, 'B2B Mode - Contractor Cost Analysis');
+
+  // FX rate note
+  if (aligned) {
+    y = addFXNote(doc, y, cur, aligned);
+  }
 
   // Employee Identity
   y = addIdentitySection(doc, y, identity);
@@ -308,14 +400,23 @@ export function exportB2BPDF(result: B2BResult, inputs: any, identity?: Employee
   doc.text('Input Summary', 14, y);
   y += 6;
 
+  const inputRows: string[][] = [
+    ['Pricing Mode', inputs.pricingMode],
+    ['Currency', cur],
+  ];
+
+  if (inputs.pricingMode !== 'CLIENT_BUDGET') {
+    inputRows.splice(0, 0, ['Cost Rate', `${formatNum(inputs.costRate)} ${cur}/${inputs.rateType?.toLowerCase() || 'day'}`]);
+  }
+
+  if (aligned) {
+    inputRows.push(['Aligned Currency', aligned.currency]);
+  }
+
   autoTable(doc, {
     startY: y,
     head: [['Parameter', 'Value']],
-    body: [
-      ['Cost Rate', `${formatNum(inputs.costRate)} ${result.currency}/${inputs.rateType?.toLowerCase() || 'day'}`],
-      ['Pricing Mode', inputs.pricingMode],
-      ['Currency', result.currency],
-    ],
+    body: inputRows,
     theme: 'grid',
     headStyles: { fillColor: [45, 45, 45] },
     styles: { fontSize: 9 },
@@ -324,7 +425,48 @@ export function exportB2BPDF(result: B2BResult, inputs: any, identity?: Employee
 
   y = (doc as any).lastAutoTable.finalY + 8;
 
-  // Results
+  // Budget Breakdown (CLIENT_BUDGET mode)
+  if (result.budgetBreakdown) {
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Budget Breakdown', 14, y);
+    y += 6;
+
+    const bb = result.budgetBreakdown;
+    autoTable(doc, {
+      startY: y,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Client Budget / Day', fmtDual(bb.clientBudgetDaily, cur, aligned)],
+        [`Margin (${bb.budgetMarginPercent}% on sales)`, fmtDual(bb.marginAmount, cur, aligned)],
+        ['Employer Cost', fmtDual(bb.employerCost, cur, aligned)],
+        [`÷ Social Multiplier`, `${bb.socialMultiplier}`],
+        ['Max Daily Rate', fmtDual(bb.maxDailyRate, cur, aligned)],
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [46, 134, 193] },
+      styles: { fontSize: 9 },
+      margin: { left: 14, right: 14 },
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
+
+  // Min margin floor alert (TARGET_MARGIN mode)
+  if (result.minMarginFloorApplied && result.minMarginFloorExplanation) {
+    doc.setFillColor(255, 251, 235);
+    doc.rect(14, y, 182, 18, 'F');
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(160, 100, 0);
+    doc.text('Minimum Daily Margin Floor Applied', 16, y + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text(result.minMarginFloorExplanation, 16, y + 10, { maxWidth: 178 });
+    y += 22;
+  }
+
+  // Profitability Analysis
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.text('Profitability Analysis', 14, y);
@@ -334,14 +476,14 @@ export function exportB2BPDF(result: B2BResult, inputs: any, identity?: Employee
     startY: y,
     head: [['Metric', 'Value']],
     body: [
-      ['Client Daily Rate', `${formatNum(result.clientRateDaily)} ${result.currency}`],
-      ['Cost Daily Rate', `${formatNum(result.costRateDaily)} ${result.currency}`],
-      ['Daily Margin', `${formatNum(result.marginAmount)} ${result.currency}`],
+      ['Client Daily Rate', fmtDual(result.clientRateDaily, cur, aligned)],
+      ['Cost Daily Rate', fmtDual(result.costRateDaily, cur, aligned)],
+      ['Daily Margin', fmtDual(result.marginAmount, cur, aligned)],
       ['Margin %', `${result.marginPercent.toFixed(1)}%`],
       ['Markup %', `${result.markupPercent.toFixed(1)}%`],
-      ['Annual Revenue', `${formatNum(result.annualRevenue)} ${result.currency}`],
-      ['Annual Cost', `${formatNum(result.annualCost)} ${result.currency}`],
-      ['Annual Profit', `${formatNum(result.annualProfit)} ${result.currency}`],
+      ['Annual Revenue', fmtDual(result.annualRevenue, cur, aligned)],
+      ['Annual Cost', fmtDual(result.annualCost, cur, aligned)],
+      ['Annual Profit', fmtDual(result.annualProfit, cur, aligned)],
     ],
     theme: 'grid',
     headStyles: { fillColor: [214, 0, 28] },
@@ -352,12 +494,30 @@ export function exportB2BPDF(result: B2BResult, inputs: any, identity?: Employee
   y = (doc as any).lastAutoTable.finalY + 10;
   addDisclaimer(doc, y);
 
-  doc.save(`TSG_B2B_${result.currency}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`TSG_B2B_${cur}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
-export function exportAllocationPDF(result: AllocationResult, inputs: any) {
+// ============================================================
+// ALLOCATION MODE PDF
+// ============================================================
+
+export function exportAllocationPDF(
+  result: AllocationResult,
+  inputs: any,
+  alignedOptions?: PDFAlignedOptions,
+) {
   const doc = new jsPDF();
+  const cur = result.currency;
+  const aligned = alignedOptions?.showAligned && alignedOptions.alignmentCurrency !== cur
+    ? { show: true, currency: alignedOptions.alignmentCurrency, rates: alignedOptions.rates }
+    : undefined;
+
   let y = addHeader(doc, 'Allocation Mode - Multi-Client Profitability');
+
+  // FX rate note
+  if (aligned) {
+    y = addFXNote(doc, y, cur, aligned);
+  }
 
   // Input Summary
   doc.setFontSize(11);
@@ -365,15 +525,21 @@ export function exportAllocationPDF(result: AllocationResult, inputs: any) {
   doc.text('Input Summary', 14, y);
   y += 6;
 
+  const inputRows: string[][] = [
+    ['Base Salary (100%)', fmtDual(inputs.salary100, cur, aligned)],
+    ['Engagement %', `${inputs.engagementPercent}%`],
+    ['Employer Multiplier', `${inputs.employerMultiplier}x`],
+    ['Working Days/Year', `${result.workingDaysPerYear}`],
+  ];
+
+  if (aligned) {
+    inputRows.push(['Aligned Currency', aligned.currency]);
+  }
+
   autoTable(doc, {
     startY: y,
     head: [['Parameter', 'Value']],
-    body: [
-      ['Base Salary (100%)', `${formatNum(inputs.salary100)} ${result.currency}`],
-      ['Engagement %', `${inputs.engagementPercent}%`],
-      ['Employer Multiplier', `${inputs.employerMultiplier}x`],
-      ['Working Days/Year', `${result.workingDaysPerYear}`],
-    ],
+    body: inputRows,
     theme: 'grid',
     headStyles: { fillColor: [45, 45, 45] },
     styles: { fontSize: 9 },
@@ -391,9 +557,9 @@ export function exportAllocationPDF(result: AllocationResult, inputs: any) {
   autoTable(doc, {
     startY: y,
     body: [
-      ['Engaged Salary', `${formatNum(result.engagedSalary)} ${result.currency}`],
-      ['Total Employer Cost', `${formatNum(result.employerCost)} ${result.currency}`],
-      ['Base Daily Cost', `${formatNum(result.baseDailyCost)} ${result.currency}`],
+      ['Engaged Salary', fmtDual(result.engagedSalary, cur, aligned)],
+      ['Total Employer Cost', fmtDual(result.employerCost, cur, aligned)],
+      ['Base Daily Cost', fmtDual(result.baseDailyCost, cur, aligned)],
     ],
     theme: 'grid',
     styles: { fontSize: 9 },
@@ -414,11 +580,11 @@ export function exportAllocationPDF(result: AllocationResult, inputs: any) {
     body: result.clients.map(c => [
       c.clientName,
       `${c.allocationPercent}%`,
-      `${formatNum(c.dailyRate)} ${result.currency}`,
-      `${formatNum(c.revenuePerDay)} ${result.currency}`,
-      `${formatNum(c.profitPerDay)} ${result.currency}`,
+      fmtDual(c.dailyRate, cur, aligned),
+      fmtDual(c.revenuePerDay, cur, aligned),
+      fmtDual(c.profitPerDay, cur, aligned),
       c.isBaseline ? 'Baseline' : 'Incremental',
-      `${formatNum(c.annualProfit)} ${result.currency}`,
+      fmtDual(c.annualProfit, cur, aligned),
     ]),
     theme: 'grid',
     headStyles: { fillColor: [214, 0, 28], fontSize: 7 },
@@ -433,8 +599,8 @@ export function exportAllocationPDF(result: AllocationResult, inputs: any) {
     startY: y,
     head: [['Summary', 'Value']],
     body: [
-      ['Total Daily Profit', `${formatNum(result.totalDailyProfit)} ${result.currency}`],
-      ['Total Annual Profit', `${formatNum(result.annualProfit)} ${result.currency}`],
+      ['Total Daily Profit', fmtDual(result.totalDailyProfit, cur, aligned)],
+      ['Total Annual Profit', fmtDual(result.annualProfit, cur, aligned)],
     ],
     theme: 'grid',
     headStyles: { fillColor: [46, 134, 193] },
@@ -445,20 +611,12 @@ export function exportAllocationPDF(result: AllocationResult, inputs: any) {
   y = (doc as any).lastAutoTable.finalY + 10;
   addDisclaimer(doc, y);
 
-  doc.save(`TSG_Allocation_${result.currency}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`TSG_Allocation_${cur}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ============================================================
-// Payslip PDF Export
+// Payslip PDF Export (already supports aligned currency — unchanged)
 // ============================================================
-
-function convertAmt(amount: number, from: string, to: string, rates: Record<string, number>): number {
-  if (from === to) return amount;
-  const fromRate = rates[from];
-  const toRate = rates[to];
-  if (!fromRate || !toRate) return amount;
-  return Math.round((amount / fromRate) * toRate * 100) / 100;
-}
 
 interface PayslipPDFOptions {
   companyName: string;
@@ -570,7 +728,6 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
   });
 
   // Total row
-  const totalColSpan = showAligned ? 6 : 5;
   const totalRow = showAligned
     ? ['', 'TOTAL DEDUCTIONS', '', '', `-${formatNum(result.totalDeductions)}`, `-${formatNum(convertAmt(result.totalDeductions, cur, alignmentCurrency!, rates!))}`]
     : ['', 'TOTAL DEDUCTIONS', '', '', `-${formatNum(result.totalDeductions)}`];
@@ -587,12 +744,10 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
       ? { 2: { halign: 'right' }, 4: { halign: 'right', textColor: [200, 50, 50] }, 5: { halign: 'right', textColor: [100, 80, 170] } }
       : { 2: { halign: 'right' }, 4: { halign: 'right', textColor: [200, 50, 50] } },
     didParseCell: (data: any) => {
-      // Bold the total row
       if (data.row.index === deductionBody.length - 1) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = [255, 245, 245];
       }
-      // Highlight capped base cells in amber
       if (data.section === 'body' && data.column.index === 2 && data.row.index < deductionBody.length - 1) {
         const d = result.deductions[data.row.index];
         if (d && !d.isManual && d.base < result.grossMonthlySalary) {

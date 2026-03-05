@@ -1,15 +1,15 @@
 // ============================================================
-// Tests for Geneva Withholding Tax Parser & Lookup
-// Complete scenario coverage
+// Tests for Geneva Withholding Tax — Rate-Based Engine
+// Using official PDF barème tables (2026) + flat rates
 // ============================================================
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import {
-  parseTariffFile,
   lookupWithholdingTax,
   determineTariffCode,
   getAvailableTariffCodes,
   clearTariffCache,
+  TARIFF_DESCRIPTIONS,
 } from '../services/withholdingGE';
 
 beforeAll(() => {
@@ -17,109 +17,223 @@ beforeAll(() => {
 });
 
 // ============================================================
-// FILE PARSER
+// TARIFF CODE AVAILABILITY
 // ============================================================
-describe('parseTariffFile', () => {
-  it('should parse the tariff file and return a non-empty map', () => {
-    const tables = parseTariffFile();
-    expect(tables.size).toBeGreaterThan(0);
-  });
-
-  it('should contain expected tariff codes', () => {
+describe('getAvailableTariffCodes', () => {
+  it('should return all expected progressive codes', () => {
     const codes = getAvailableTariffCodes();
-    expect(codes).toContain('A0N');
-    expect(codes).toContain('B2N');
-    expect(codes).toContain('C0N');
-    expect(codes).toContain('H1N');
+    // ABCH codes
+    expect(codes).toContain('A0');
+    expect(codes).toContain('A5');
+    expect(codes).toContain('B0');
+    expect(codes).toContain('B5');
+    expect(codes).toContain('C0');
+    expect(codes).toContain('C5');
+    expect(codes).toContain('H1');
+    expect(codes).toContain('H5');
+    // G code
+    expect(codes).toContain('G9');
   });
 
-  it('should contain cross-border codes', () => {
+  it('should return all flat rate cross-border codes', () => {
     const codes = getAvailableTariffCodes();
-    expect(codes).toContain('G9N'); // G only has digit 9
-    expect(codes).toContain('M0N');
-    expect(codes).toContain('P1N');
-    expect(codes).toContain('L0N');
-    expect(codes).toContain('N0N');
-    expect(codes).toContain('Q9N'); // Q only has digit 9
+    expect(codes).toContain('L0');
+    expect(codes).toContain('L5');
+    expect(codes).toContain('M0');
+    expect(codes).toContain('M5');
+    expect(codes).toContain('N0');
+    expect(codes).toContain('N5');
+    expect(codes).toContain('P1');
+    expect(codes).toContain('P5');
+    expect(codes).toContain('Q9');
+    expect(codes).toContain('E0');
   });
 
-  it('should have sorted brackets for each tariff', () => {
-    const tables = parseTariffFile();
-    const a0 = tables.get('A0N')!;
-    for (let i = 1; i < a0.brackets.length; i++) {
-      expect(a0.brackets[i].incomeLowerCHF).toBeGreaterThanOrEqual(a0.brackets[i - 1].incomeLowerCHF);
-    }
+  it('should have descriptions for all tariff letters', () => {
+    expect(TARIFF_DESCRIPTIONS['A']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['B']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['C']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['G']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['H']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['L']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['M']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['N']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['P']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['Q']).toBeDefined();
+    expect(TARIFF_DESCRIPTIONS['E']).toBeDefined();
   });
 });
 
 // ============================================================
-// TAX LOOKUP
+// TAX LOOKUP — PROGRESSIVE TARIFFS (ABCH)
 // ============================================================
-describe('lookupWithholdingTax', () => {
-  it('A0 at 5000 CHF → tax 762 CHF (15.24%)', () => {
+describe('lookupWithholdingTax — progressive ABCH', () => {
+
+  // ---- A0 (Single, no children) ----
+  it('A0 at 5000 CHF → rate 7.62%, tax 381 CHF', () => {
     const r = lookupWithholdingTax(5000, 'A0');
-    expect(r.taxAmount).toBe(762);
-    expect(r.effectiveRate).toBe(15.24);
+    expect(r.effectiveRate).toBe(7.62);
+    expect(r.taxAmount).toBe(381);
     expect(r.tariffCode).toBe('A0');
   });
 
-  it('A0 at 10000 CHF → tax 1556 CHF', () => {
+  it('A0 at 7500 CHF → rate 12.33%, tax 924.75 CHF', () => {
+    const r = lookupWithholdingTax(7500, 'A0');
+    expect(r.effectiveRate).toBe(12.33);
+    expect(r.taxAmount).toBe(924.75);
+  });
+
+  it('A0 at 10000 CHF → rate 15.56%, tax 1556 CHF', () => {
     const r = lookupWithholdingTax(10000, 'A0');
+    expect(r.effectiveRate).toBe(15.56);
     expect(r.taxAmount).toBe(1556);
   });
 
-  it('B0 at 10000 CHF → tax 853 CHF', () => {
+  it('A0 at 12000 CHF → rate 17.52%, tax 2102.40 CHF', () => {
+    const r = lookupWithholdingTax(12000, 'A0');
+    expect(r.effectiveRate).toBe(17.52);
+    expect(r.taxAmount).toBe(2102.40);
+  });
+
+  // ---- B0 (Married, single-earner, no children) ----
+  it('B0 at 10000 CHF → rate 8.53%, tax 853 CHF', () => {
     const r = lookupWithholdingTax(10000, 'B0');
+    expect(r.effectiveRate).toBe(8.53);
     expect(r.taxAmount).toBe(853);
   });
 
-  it('B2 at 10000 CHF → tax 253 CHF (lower due to 2 children)', () => {
+  // ---- B2 (Married, single-earner, 2 children) ----
+  it('B2 at 10000 CHF → rate 2.53%, tax 253 CHF', () => {
     const r = lookupWithholdingTax(10000, 'B2');
-    expect(r.taxAmount).toBe(253);
     expect(r.effectiveRate).toBe(2.53);
+    expect(r.taxAmount).toBe(253);
+    expect(r.notes.some(n => n.includes('children: 2'))).toBe(true);
   });
 
-  it('B3 at 10000 CHF → tax 39 CHF (3 children)', () => {
+  // ---- B3 (Married, 3 children) ----
+  it('B3 at 10000 CHF → rate 0.39%, tax 39 CHF', () => {
     const r = lookupWithholdingTax(10000, 'B3');
+    expect(r.effectiveRate).toBe(0.39);
     expect(r.taxAmount).toBe(39);
   });
 
-  it('should return 0 tax for income below first bracket', () => {
-    const r = lookupWithholdingTax(100, 'A0');
-    expect(r.taxAmount).toBe(0);
+  // ---- C0 (Married, double-earner, no children) ----
+  it('C0 at 10000 CHF → rate 13.90%', () => {
+    const r = lookupWithholdingTax(10000, 'C0');
+    expect(r.effectiveRate).toBe(13.90);
+    expect(r.taxAmount).toBe(1390);
   });
 
+  // ---- H1 (Single parent, 1 child) ----
+  it('H1 at 10000 CHF → rate 6.70%', () => {
+    const r = lookupWithholdingTax(10000, 'H1');
+    expect(r.effectiveRate).toBe(6.70);
+    expect(r.taxAmount).toBe(670);
+    expect(r.notes.some(n => n.includes('children: 1'))).toBe(true);
+  });
+
+  // ---- Zero / low income ----
+  it('should return 0 tax for very low income (below first bracket)', () => {
+    const r = lookupWithholdingTax(100, 'A0');
+    expect(r.taxAmount).toBe(0);
+    expect(r.effectiveRate).toBe(0);
+  });
+
+  // ---- Unknown code ----
   it('should throw for unknown tariff code', () => {
     expect(() => lookupWithholdingTax(5000, 'Z9')).toThrow('not found');
   });
 
-  it('A0 at 7500 CHF → tax 1233 CHF', () => {
-    const r = lookupWithholdingTax(7500, 'A0');
-    expect(r.taxAmount).toBe(1233);
-    expect(r.effectiveRate).toBe(16.44);
-  });
-
+  // ---- Notes ----
   it('should include tariff description in notes', () => {
     const r = lookupWithholdingTax(5000, 'A0');
     expect(r.notes.some(n => n.includes('Single'))).toBe(true);
   });
+});
 
-  it('should include children note for non-zero digit', () => {
-    const r = lookupWithholdingTax(10000, 'B2');
-    expect(r.notes.some(n => n.includes('children: 2'))).toBe(true);
-  });
-
-  // Cross-border tariff lookups
-  it('G9 at 7500 CHF → returns a valid tax (cross-border single)', () => {
-    const r = lookupWithholdingTax(7500, 'G9');
-    expect(r.taxAmount).toBeGreaterThan(0);
+// ============================================================
+// TAX LOOKUP — G9 (Cross-border progressive)
+// ============================================================
+describe('lookupWithholdingTax — G9 (cross-border progressive)', () => {
+  it('G9 at 5000 CHF → rate 8.20%, tax 410 CHF', () => {
+    const r = lookupWithholdingTax(5000, 'G9');
+    expect(r.effectiveRate).toBe(8.20);
+    expect(r.taxAmount).toBe(410);
     expect(r.tariffCode).toBe('G9');
   });
 
-  it('M2 at 8000 CHF → returns a valid tax (cross-border married 2 kids)', () => {
-    const r = lookupWithholdingTax(8000, 'M2');
-    expect(r.taxAmount).toBeGreaterThanOrEqual(0);
+  it('G9 at 7500 CHF → rate 9.20%, tax 690 CHF', () => {
+    const r = lookupWithholdingTax(7500, 'G9');
+    expect(r.effectiveRate).toBe(9.20);
+    expect(r.taxAmount).toBe(690);
+  });
+
+  it('G9 at 10000 CHF → rate 10.49%, tax 1049 CHF', () => {
+    const r = lookupWithholdingTax(10000, 'G9');
+    expect(r.effectiveRate).toBe(10.49);
+    expect(r.taxAmount).toBe(1049);
+  });
+
+  it('G9 at 12000 CHF → rate 11.61%, tax 1393.20 CHF', () => {
+    const r = lookupWithholdingTax(12000, 'G9');
+    expect(r.effectiveRate).toBe(11.61);
+    expect(r.taxAmount).toBe(1393.2);
+  });
+});
+
+// ============================================================
+// TAX LOOKUP — FLAT RATE CODES (L/M/N/P/Q/E)
+// ============================================================
+describe('lookupWithholdingTax — flat rate codes', () => {
+  it('M2 at 10000 CHF → flat 4.50%, tax 450 CHF', () => {
+    const r = lookupWithholdingTax(10000, 'M2');
+    expect(r.effectiveRate).toBe(4.50);
+    expect(r.taxAmount).toBe(450);
     expect(r.tariffCode).toBe('M2');
+    expect(r.notes.some(n => n.includes('Flat rate'))).toBe(true);
+    expect(r.notes.some(n => n.includes('children: 2'))).toBe(true);
+  });
+
+  it('N0 at 8000 CHF → flat 4.50%, tax 360 CHF', () => {
+    const r = lookupWithholdingTax(8000, 'N0');
+    expect(r.effectiveRate).toBe(4.50);
+    expect(r.taxAmount).toBe(360);
+  });
+
+  it('P1 at 7500 CHF → flat 4.50%, tax 337.50 CHF', () => {
+    const r = lookupWithholdingTax(7500, 'P1');
+    expect(r.effectiveRate).toBe(4.50);
+    expect(r.taxAmount).toBe(337.50);
+  });
+
+  it('L0 at 5000 CHF → flat 4.50%, tax 225 CHF', () => {
+    const r = lookupWithholdingTax(5000, 'L0');
+    expect(r.effectiveRate).toBe(4.50);
+    expect(r.taxAmount).toBe(225);
+  });
+
+  it('L2 at 6000 CHF → flat 4.50%, tax 270 CHF', () => {
+    const r = lookupWithholdingTax(6000, 'L2');
+    expect(r.effectiveRate).toBe(4.50);
+    expect(r.taxAmount).toBe(270);
+  });
+
+  it('Q9 at 10000 CHF → flat 4.50%, tax 450 CHF', () => {
+    const r = lookupWithholdingTax(10000, 'Q9');
+    expect(r.effectiveRate).toBe(4.50);
+    expect(r.taxAmount).toBe(450);
+  });
+
+  it('E0 at 10000 CHF → flat 5.00%, tax 500 CHF', () => {
+    const r = lookupWithholdingTax(10000, 'E0');
+    expect(r.effectiveRate).toBe(5.00);
+    expect(r.taxAmount).toBe(500);
+  });
+
+  it('flat rate codes have no bracket (bracketFrom=0, bracketTo=0)', () => {
+    const r = lookupWithholdingTax(10000, 'M2');
+    expect(r.bracketFrom).toBe(0);
+    expect(r.bracketTo).toBe(0);
   });
 });
 
@@ -666,7 +780,7 @@ describe('determineTariffCode', () => {
         childrenCount: 2,
         isSingleParent: false,
       });
-      expect(d.tariffCode).toBe('A2'); // A tariff (not H since no sole custody), digit = children
+      expect(d.tariffCode).toBe('A2');
     });
 
     it('children > 5 capped at 5', () => {
@@ -688,7 +802,6 @@ describe('determineTariffCode', () => {
         residence: 'geneva',
         childrenCount: 3,
       });
-      // Single without sole custody → A3
       expect(d.tariffCode).toBe('A3');
     });
 
@@ -704,7 +817,7 @@ describe('determineTariffCode', () => {
       expect(d.tariffCode).toBe('C3');
     });
 
-    it('G tariff always digit 9 (regardless of children)', () => {
+    it('G tariff always G9 for single (regardless of children)', () => {
       const d = determineTariffCode({
         nationality: 'foreign',
         permit: 'G',
@@ -712,10 +825,11 @@ describe('determineTariffCode', () => {
         residence: 'france',
         childrenCount: 2,
       });
+      // Single cross-border → G9 (no M/N/P applies for single non-parent)
       expect(d.tariffCode).toBe('G9');
     });
 
-    it('N tariff includes children digit', () => {
+    it('N tariff includes children digit for married double-earner cross-border', () => {
       const d = determineTariffCode({
         nationality: 'foreign',
         permit: 'G',
@@ -725,6 +839,80 @@ describe('determineTariffCode', () => {
         spouseHasSwissIncome: true,
       });
       expect(d.tariffCode).toBe('N3');
+    });
+
+    it('cross-border children capped at 5', () => {
+      const d = determineTariffCode({
+        nationality: 'foreign',
+        permit: 'G',
+        maritalStatus: 'married',
+        residence: 'france',
+        childrenCount: 8,
+        spouseHasSwissIncome: false,
+      });
+      expect(d.tariffCode).toBe('M5');
+    });
+  });
+
+  // ──────────────────────────────────────────
+  // COMBINED SCENARIOS (determination + lookup)
+  // ──────────────────────────────────────────
+
+  describe('End-to-end: determination + tax lookup', () => {
+    it('Swiss in France, single, 7500 CHF → G9, 690 CHF tax (9.20%)', () => {
+      const d = determineTariffCode({
+        nationality: 'swiss',
+        maritalStatus: 'single',
+        residence: 'france',
+        childrenCount: 0,
+      });
+      expect(d.tariffCode).toBe('G9');
+      const r = lookupWithholdingTax(7500, d.tariffCode);
+      expect(r.taxAmount).toBe(690);
+      expect(r.effectiveRate).toBe(9.20);
+    });
+
+    it('G-permit, married, 2 kids, France, 10000 CHF → M2, 450 CHF tax (4.50%)', () => {
+      const d = determineTariffCode({
+        nationality: 'foreign',
+        permit: 'G',
+        maritalStatus: 'married',
+        residence: 'france',
+        childrenCount: 2,
+        spouseHasSwissIncome: false,
+      });
+      expect(d.tariffCode).toBe('M2');
+      const r = lookupWithholdingTax(10000, d.tariffCode);
+      expect(r.taxAmount).toBe(450);
+      expect(r.effectiveRate).toBe(4.50);
+    });
+
+    it('B-permit, single, Geneva, 10000 CHF → A0, 1556 CHF tax (15.56%)', () => {
+      const d = determineTariffCode({
+        nationality: 'foreign',
+        permit: 'B',
+        maritalStatus: 'single',
+        residence: 'geneva',
+        childrenCount: 0,
+      });
+      expect(d.tariffCode).toBe('A0');
+      const r = lookupWithholdingTax(10000, d.tariffCode);
+      expect(r.taxAmount).toBe(1556);
+      expect(r.effectiveRate).toBe(15.56);
+    });
+
+    it('L-permit abroad, married, 2 kids, 8000 CHF → L2, 360 CHF tax (4.50%)', () => {
+      const d = determineTariffCode({
+        nationality: 'foreign',
+        permit: 'L',
+        maritalStatus: 'married',
+        residence: 'france',
+        childrenCount: 2,
+      });
+      expect(d.tariffCode).toBe('L2');
+      const r = lookupWithholdingTax(8000, d.tariffCode);
+      expect(r.taxAmount).toBe(360);
+      expect(r.effectiveRate).toBe(4.50);
     });
   });
 });

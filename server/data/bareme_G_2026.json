@@ -1,0 +1,3402 @@
+[
+  {
+    "monthly_from": 0.0,
+    "monthly_to": 1749.95,
+    "G": 7.0
+  },
+  {
+    "monthly_from": 1750.0,
+    "monthly_to": 1799.95,
+    "G": 7.12
+  },
+  {
+    "monthly_from": 1800.0,
+    "monthly_to": 1849.95,
+    "G": 7.14
+  },
+  {
+    "monthly_from": 1850.0,
+    "monthly_to": 1899.95,
+    "G": 7.16
+  },
+  {
+    "monthly_from": 1900.0,
+    "monthly_to": 1949.95,
+    "G": 7.18
+  },
+  {
+    "monthly_from": 1950.0,
+    "monthly_to": 1999.95,
+    "G": 7.19
+  },
+  {
+    "monthly_from": 2000.0,
+    "monthly_to": 2049.95,
+    "G": 7.21
+  },
+  {
+    "monthly_from": 2050.0,
+    "monthly_to": 2099.95,
+    "G": 7.22
+  },
+  {
+    "monthly_from": 2100.0,
+    "monthly_to": 2149.95,
+    "G": 7.24
+  },
+  {
+    "monthly_from": 2150.0,
+    "monthly_to": 2199.95,
+    "G": 7.25
+  },
+  {
+    "monthly_from": 2200.0,
+    "monthly_to": 2249.95,
+    "G": 7.26
+  },
+  {
+    "monthly_from": 2250.0,
+    "monthly_to": 2299.95,
+    "G": 7.27
+  },
+  {
+    "monthly_from": 2300.0,
+    "monthly_to": 2349.95,
+    "G": 7.28
+  },
+  {
+    "monthly_from": 2350.0,
+    "monthly_to": 2399.95,
+    "G": 7.29
+  },
+  {
+    "monthly_from": 2400.0,
+    "monthly_to": 2449.95,
+    "G": 7.31
+  },
+  {
+    "monthly_from": 2450.0,
+    "monthly_to": 2549.95,
+    "G": 7.32
+  },
+  {
+    "monthly_from": 2550.0,
+    "monthly_to": 2599.95,
+    "G": 7.33
+  },
+  {
+    "monthly_from": 2600.0,
+    "monthly_to": 2649.95,
+    "G": 7.34
+  },
+  {
+    "monthly_from": 2650.0,
+    "monthly_to": 2699.95,
+    "G": 7.35
+  },
+  {
+    "monthly_from": 2700.0,
+    "monthly_to": 2749.95,
+    "G": 7.36
+  },
+  {
+    "monthly_from": 2750.0,
+    "monthly_to": 2799.95,
+    "G": 7.37
+  },
+  {
+    "monthly_from": 2800.0,
+    "monthly_to": 2899.95,
+    "G": 7.38
+  },
+  {
+    "monthly_from": 2900.0,
+    "monthly_to": 2949.95,
+    "G": 7.39
+  },
+  {
+    "monthly_from": 2950.0,
+    "monthly_to": 2999.95,
+    "G": 7.4
+  },
+  {
+    "monthly_from": 3000.0,
+    "monthly_to": 3049.95,
+    "G": 7.42
+  },
+  {
+    "monthly_from": 3050.0,
+    "monthly_to": 3099.95,
+    "G": 7.45
+  },
+  {
+    "monthly_from": 3100.0,
+    "monthly_to": 3149.95,
+    "G": 7.48
+  },
+  {
+    "monthly_from": 3150.0,
+    "monthly_to": 3199.95,
+    "G": 7.51
+  },
+  {
+    "monthly_from": 3200.0,
+    "monthly_to": 3249.95,
+    "G": 7.54
+  },
+  {
+    "monthly_from": 3250.0,
+    "monthly_to": 3299.95,
+    "G": 7.56
+  },
+  {
+    "monthly_from": 3300.0,
+    "monthly_to": 3349.95,
+    "G": 7.59
+  },
+  {
+    "monthly_from": 3350.0,
+    "monthly_to": 3399.95,
+    "G": 7.62
+  },
+  {
+    "monthly_from": 3400.0,
+    "monthly_to": 3449.95,
+    "G": 7.64
+  },
+  {
+    "monthly_from": 3450.0,
+    "monthly_to": 3499.95,
+    "G": 7.67
+  },
+  {
+    "monthly_from": 3500.0,
+    "monthly_to": 3549.95,
+    "G": 7.69
+  },
+  {
+    "monthly_from": 3550.0,
+    "monthly_to": 3599.95,
+    "G": 7.71
+  },
+  {
+    "monthly_from": 3600.0,
+    "monthly_to": 3649.95,
+    "G": 7.74
+  },
+  {
+    "monthly_from": 3650.0,
+    "monthly_to": 3699.95,
+    "G": 7.76
+  },
+  {
+    "monthly_from": 3700.0,
+    "monthly_to": 3749.95,
+    "G": 7.78
+  },
+  {
+    "monthly_from": 3750.0,
+    "monthly_to": 3799.95,
+    "G": 7.8
+  },
+  {
+    "monthly_from": 3800.0,
+    "monthly_to": 3849.95,
+    "G": 7.82
+  },
+  {
+    "monthly_from": 3850.0,
+    "monthly_to": 3899.95,
+    "G": 7.84
+  },
+  {
+    "monthly_from": 3900.0,
+    "monthly_to": 3949.95,
+    "G": 7.86
+  },
+  {
+    "monthly_from": 3950.0,
+    "monthly_to": 3999.95,
+    "G": 7.88
+  },
+  {
+    "monthly_from": 4000.0,
+    "monthly_to": 4049.95,
+    "G": 7.9
+  },
+  {
+    "monthly_from": 4050.0,
+    "monthly_to": 4099.95,
+    "G": 7.91
+  },
+  {
+    "monthly_from": 4100.0,
+    "monthly_to": 4149.95,
+    "G": 7.93
+  },
+  {
+    "monthly_from": 4150.0,
+    "monthly_to": 4199.95,
+    "G": 7.95
+  },
+  {
+    "monthly_from": 4200.0,
+    "monthly_to": 4249.95,
+    "G": 7.97
+  },
+  {
+    "monthly_from": 4250.0,
+    "monthly_to": 4299.95,
+    "G": 7.98
+  },
+  {
+    "monthly_from": 4300.0,
+    "monthly_to": 4349.95,
+    "G": 8.0
+  },
+  {
+    "monthly_from": 4350.0,
+    "monthly_to": 4399.95,
+    "G": 8.01
+  },
+  {
+    "monthly_from": 4400.0,
+    "monthly_to": 4449.95,
+    "G": 8.03
+  },
+  {
+    "monthly_from": 4450.0,
+    "monthly_to": 4499.95,
+    "G": 8.04
+  },
+  {
+    "monthly_from": 4500.0,
+    "monthly_to": 4549.95,
+    "G": 8.06
+  },
+  {
+    "monthly_from": 4550.0,
+    "monthly_to": 4599.95,
+    "G": 8.07
+  },
+  {
+    "monthly_from": 4600.0,
+    "monthly_to": 4649.95,
+    "G": 8.09
+  },
+  {
+    "monthly_from": 4650.0,
+    "monthly_to": 4699.95,
+    "G": 8.1
+  },
+  {
+    "monthly_from": 4700.0,
+    "monthly_to": 4749.95,
+    "G": 8.11
+  },
+  {
+    "monthly_from": 4750.0,
+    "monthly_to": 4799.95,
+    "G": 8.12
+  },
+  {
+    "monthly_from": 4800.0,
+    "monthly_to": 4849.95,
+    "G": 8.14
+  },
+  {
+    "monthly_from": 4850.0,
+    "monthly_to": 4899.95,
+    "G": 8.15
+  },
+  {
+    "monthly_from": 4900.0,
+    "monthly_to": 4949.95,
+    "G": 8.16
+  },
+  {
+    "monthly_from": 4950.0,
+    "monthly_to": 4999.95,
+    "G": 8.17
+  },
+  {
+    "monthly_from": 5000.0,
+    "monthly_to": 5049.95,
+    "G": 8.2
+  },
+  {
+    "monthly_from": 5050.0,
+    "monthly_to": 5099.95,
+    "G": 8.22
+  },
+  {
+    "monthly_from": 5100.0,
+    "monthly_to": 5149.95,
+    "G": 8.25
+  },
+  {
+    "monthly_from": 5150.0,
+    "monthly_to": 5199.95,
+    "G": 8.28
+  },
+  {
+    "monthly_from": 5200.0,
+    "monthly_to": 5249.95,
+    "G": 8.31
+  },
+  {
+    "monthly_from": 5250.0,
+    "monthly_to": 5299.95,
+    "G": 8.34
+  },
+  {
+    "monthly_from": 5300.0,
+    "monthly_to": 5349.95,
+    "G": 8.36
+  },
+  {
+    "monthly_from": 5350.0,
+    "monthly_to": 5399.95,
+    "G": 8.39
+  },
+  {
+    "monthly_from": 5400.0,
+    "monthly_to": 5449.95,
+    "G": 8.42
+  },
+  {
+    "monthly_from": 5450.0,
+    "monthly_to": 5499.95,
+    "G": 8.44
+  },
+  {
+    "monthly_from": 5500.0,
+    "monthly_to": 5549.95,
+    "G": 8.47
+  },
+  {
+    "monthly_from": 5550.0,
+    "monthly_to": 5599.95,
+    "G": 8.49
+  },
+  {
+    "monthly_from": 5600.0,
+    "monthly_to": 5649.95,
+    "G": 8.52
+  },
+  {
+    "monthly_from": 5650.0,
+    "monthly_to": 5699.95,
+    "G": 8.54
+  },
+  {
+    "monthly_from": 5700.0,
+    "monthly_to": 5749.95,
+    "G": 8.56
+  },
+  {
+    "monthly_from": 5750.0,
+    "monthly_to": 5799.95,
+    "G": 8.59
+  },
+  {
+    "monthly_from": 5800.0,
+    "monthly_to": 5849.95,
+    "G": 8.61
+  },
+  {
+    "monthly_from": 5850.0,
+    "monthly_to": 5899.95,
+    "G": 8.63
+  },
+  {
+    "monthly_from": 5900.0,
+    "monthly_to": 5949.95,
+    "G": 8.65
+  },
+  {
+    "monthly_from": 5950.0,
+    "monthly_to": 5999.95,
+    "G": 8.67
+  },
+  {
+    "monthly_from": 6000.0,
+    "monthly_to": 6049.95,
+    "G": 8.69
+  },
+  {
+    "monthly_from": 6050.0,
+    "monthly_to": 6099.95,
+    "G": 8.71
+  },
+  {
+    "monthly_from": 6100.0,
+    "monthly_to": 6149.95,
+    "G": 8.73
+  },
+  {
+    "monthly_from": 6150.0,
+    "monthly_to": 6199.95,
+    "G": 8.75
+  },
+  {
+    "monthly_from": 6200.0,
+    "monthly_to": 6249.95,
+    "G": 8.77
+  },
+  {
+    "monthly_from": 6250.0,
+    "monthly_to": 6299.95,
+    "G": 8.79
+  },
+  {
+    "monthly_from": 6300.0,
+    "monthly_to": 6349.95,
+    "G": 8.81
+  },
+  {
+    "monthly_from": 6350.0,
+    "monthly_to": 6399.95,
+    "G": 8.83
+  },
+  {
+    "monthly_from": 6400.0,
+    "monthly_to": 6449.95,
+    "G": 8.85
+  },
+  {
+    "monthly_from": 6450.0,
+    "monthly_to": 6499.95,
+    "G": 8.87
+  },
+  {
+    "monthly_from": 6500.0,
+    "monthly_to": 6549.95,
+    "G": 8.89
+  },
+  {
+    "monthly_from": 6550.0,
+    "monthly_to": 6599.95,
+    "G": 8.9
+  },
+  {
+    "monthly_from": 6600.0,
+    "monthly_to": 6649.95,
+    "G": 8.92
+  },
+  {
+    "monthly_from": 6650.0,
+    "monthly_to": 6699.95,
+    "G": 8.94
+  },
+  {
+    "monthly_from": 6700.0,
+    "monthly_to": 6749.95,
+    "G": 8.95
+  },
+  {
+    "monthly_from": 6750.0,
+    "monthly_to": 6799.95,
+    "G": 8.97
+  },
+  {
+    "monthly_from": 6800.0,
+    "monthly_to": 6849.95,
+    "G": 8.99
+  },
+  {
+    "monthly_from": 6850.0,
+    "monthly_to": 6899.95,
+    "G": 9.0
+  },
+  {
+    "monthly_from": 6900.0,
+    "monthly_to": 6949.95,
+    "G": 9.02
+  },
+  {
+    "monthly_from": 6950.0,
+    "monthly_to": 6999.95,
+    "G": 9.04
+  },
+  {
+    "monthly_from": 7000.0,
+    "monthly_to": 7049.95,
+    "G": 9.05
+  },
+  {
+    "monthly_from": 7050.0,
+    "monthly_to": 7099.95,
+    "G": 9.07
+  },
+  {
+    "monthly_from": 7100.0,
+    "monthly_to": 7149.95,
+    "G": 9.08
+  },
+  {
+    "monthly_from": 7150.0,
+    "monthly_to": 7199.95,
+    "G": 9.1
+  },
+  {
+    "monthly_from": 7200.0,
+    "monthly_to": 7249.95,
+    "G": 9.11
+  },
+  {
+    "monthly_from": 7250.0,
+    "monthly_to": 7299.95,
+    "G": 9.12
+  },
+  {
+    "monthly_from": 7300.0,
+    "monthly_to": 7349.95,
+    "G": 9.14
+  },
+  {
+    "monthly_from": 7350.0,
+    "monthly_to": 7399.95,
+    "G": 9.15
+  },
+  {
+    "monthly_from": 7400.0,
+    "monthly_to": 7449.95,
+    "G": 9.17
+  },
+  {
+    "monthly_from": 7450.0,
+    "monthly_to": 7499.95,
+    "G": 9.18
+  },
+  {
+    "monthly_from": 7500.0,
+    "monthly_to": 7549.95,
+    "G": 9.2
+  },
+  {
+    "monthly_from": 7550.0,
+    "monthly_to": 7599.95,
+    "G": 9.24
+  },
+  {
+    "monthly_from": 7600.0,
+    "monthly_to": 7649.95,
+    "G": 9.27
+  },
+  {
+    "monthly_from": 7650.0,
+    "monthly_to": 7699.95,
+    "G": 9.3
+  },
+  {
+    "monthly_from": 7700.0,
+    "monthly_to": 7749.95,
+    "G": 9.34
+  },
+  {
+    "monthly_from": 7750.0,
+    "monthly_to": 7799.95,
+    "G": 9.37
+  },
+  {
+    "monthly_from": 7800.0,
+    "monthly_to": 7849.95,
+    "G": 9.4
+  },
+  {
+    "monthly_from": 7850.0,
+    "monthly_to": 7899.95,
+    "G": 9.43
+  },
+  {
+    "monthly_from": 7900.0,
+    "monthly_to": 7949.95,
+    "G": 9.46
+  },
+  {
+    "monthly_from": 7950.0,
+    "monthly_to": 7999.95,
+    "G": 9.49
+  },
+  {
+    "monthly_from": 8000.0,
+    "monthly_to": 8049.95,
+    "G": 9.52
+  },
+  {
+    "monthly_from": 8050.0,
+    "monthly_to": 8099.95,
+    "G": 9.55
+  },
+  {
+    "monthly_from": 8100.0,
+    "monthly_to": 8149.95,
+    "G": 9.58
+  },
+  {
+    "monthly_from": 8150.0,
+    "monthly_to": 8199.95,
+    "G": 9.61
+  },
+  {
+    "monthly_from": 8200.0,
+    "monthly_to": 8249.95,
+    "G": 9.64
+  },
+  {
+    "monthly_from": 8250.0,
+    "monthly_to": 8299.95,
+    "G": 9.67
+  },
+  {
+    "monthly_from": 8300.0,
+    "monthly_to": 8349.95,
+    "G": 9.7
+  },
+  {
+    "monthly_from": 8350.0,
+    "monthly_to": 8399.95,
+    "G": 9.73
+  },
+  {
+    "monthly_from": 8400.0,
+    "monthly_to": 8449.95,
+    "G": 9.75
+  },
+  {
+    "monthly_from": 8450.0,
+    "monthly_to": 8499.95,
+    "G": 9.78
+  },
+  {
+    "monthly_from": 8500.0,
+    "monthly_to": 8549.95,
+    "G": 9.81
+  },
+  {
+    "monthly_from": 8550.0,
+    "monthly_to": 8599.95,
+    "G": 9.83
+  },
+  {
+    "monthly_from": 8600.0,
+    "monthly_to": 8649.95,
+    "G": 9.86
+  },
+  {
+    "monthly_from": 8650.0,
+    "monthly_to": 8699.95,
+    "G": 9.89
+  },
+  {
+    "monthly_from": 8700.0,
+    "monthly_to": 8749.95,
+    "G": 9.91
+  },
+  {
+    "monthly_from": 8750.0,
+    "monthly_to": 8799.95,
+    "G": 9.94
+  },
+  {
+    "monthly_from": 8800.0,
+    "monthly_to": 8849.95,
+    "G": 9.96
+  },
+  {
+    "monthly_from": 8850.0,
+    "monthly_to": 8899.95,
+    "G": 9.99
+  },
+  {
+    "monthly_from": 8900.0,
+    "monthly_to": 8949.95,
+    "G": 10.01
+  },
+  {
+    "monthly_from": 8950.0,
+    "monthly_to": 8999.95,
+    "G": 10.04
+  },
+  {
+    "monthly_from": 9000.0,
+    "monthly_to": 9049.95,
+    "G": 10.06
+  },
+  {
+    "monthly_from": 9050.0,
+    "monthly_to": 9099.95,
+    "G": 10.08
+  },
+  {
+    "monthly_from": 9100.0,
+    "monthly_to": 9149.95,
+    "G": 10.11
+  },
+  {
+    "monthly_from": 9150.0,
+    "monthly_to": 9199.95,
+    "G": 10.13
+  },
+  {
+    "monthly_from": 9200.0,
+    "monthly_to": 9249.95,
+    "G": 10.15
+  },
+  {
+    "monthly_from": 9250.0,
+    "monthly_to": 9299.95,
+    "G": 10.17
+  },
+  {
+    "monthly_from": 9300.0,
+    "monthly_to": 9349.95,
+    "G": 10.2
+  },
+  {
+    "monthly_from": 9350.0,
+    "monthly_to": 9399.95,
+    "G": 10.22
+  },
+  {
+    "monthly_from": 9400.0,
+    "monthly_to": 9449.95,
+    "G": 10.24
+  },
+  {
+    "monthly_from": 9450.0,
+    "monthly_to": 9499.95,
+    "G": 10.26
+  },
+  {
+    "monthly_from": 9500.0,
+    "monthly_to": 9549.95,
+    "G": 10.28
+  },
+  {
+    "monthly_from": 9550.0,
+    "monthly_to": 9599.95,
+    "G": 10.31
+  },
+  {
+    "monthly_from": 9600.0,
+    "monthly_to": 9649.95,
+    "G": 10.33
+  },
+  {
+    "monthly_from": 9650.0,
+    "monthly_to": 9699.95,
+    "G": 10.35
+  },
+  {
+    "monthly_from": 9700.0,
+    "monthly_to": 9749.95,
+    "G": 10.37
+  },
+  {
+    "monthly_from": 9750.0,
+    "monthly_to": 9799.95,
+    "G": 10.39
+  },
+  {
+    "monthly_from": 9800.0,
+    "monthly_to": 9849.95,
+    "G": 10.41
+  },
+  {
+    "monthly_from": 9850.0,
+    "monthly_to": 9899.95,
+    "G": 10.43
+  },
+  {
+    "monthly_from": 9900.0,
+    "monthly_to": 9949.95,
+    "G": 10.45
+  },
+  {
+    "monthly_from": 9950.0,
+    "monthly_to": 9999.95,
+    "G": 10.47
+  },
+  {
+    "monthly_from": 10000.0,
+    "monthly_to": 10049.95,
+    "G": 10.49
+  },
+  {
+    "monthly_from": 10050.0,
+    "monthly_to": 10099.95,
+    "G": 10.53
+  },
+  {
+    "monthly_from": 10100.0,
+    "monthly_to": 10149.95,
+    "G": 10.56
+  },
+  {
+    "monthly_from": 10150.0,
+    "monthly_to": 10199.95,
+    "G": 10.59
+  },
+  {
+    "monthly_from": 10200.0,
+    "monthly_to": 10249.95,
+    "G": 10.63
+  },
+  {
+    "monthly_from": 10250.0,
+    "monthly_to": 10299.95,
+    "G": 10.66
+  },
+  {
+    "monthly_from": 10300.0,
+    "monthly_to": 10349.95,
+    "G": 10.69
+  },
+  {
+    "monthly_from": 10350.0,
+    "monthly_to": 10399.95,
+    "G": 10.72
+  },
+  {
+    "monthly_from": 10400.0,
+    "monthly_to": 10449.95,
+    "G": 10.75
+  },
+  {
+    "monthly_from": 10450.0,
+    "monthly_to": 10499.95,
+    "G": 10.78
+  },
+  {
+    "monthly_from": 10500.0,
+    "monthly_to": 10549.95,
+    "G": 10.81
+  },
+  {
+    "monthly_from": 10550.0,
+    "monthly_to": 10599.95,
+    "G": 10.84
+  },
+  {
+    "monthly_from": 10600.0,
+    "monthly_to": 10649.95,
+    "G": 10.87
+  },
+  {
+    "monthly_from": 10650.0,
+    "monthly_to": 10699.95,
+    "G": 10.9
+  },
+  {
+    "monthly_from": 10700.0,
+    "monthly_to": 10749.95,
+    "G": 10.93
+  },
+  {
+    "monthly_from": 10750.0,
+    "monthly_to": 10799.95,
+    "G": 10.96
+  },
+  {
+    "monthly_from": 10800.0,
+    "monthly_to": 10849.95,
+    "G": 10.99
+  },
+  {
+    "monthly_from": 10850.0,
+    "monthly_to": 10899.95,
+    "G": 11.02
+  },
+  {
+    "monthly_from": 10900.0,
+    "monthly_to": 10949.95,
+    "G": 11.05
+  },
+  {
+    "monthly_from": 10950.0,
+    "monthly_to": 10999.95,
+    "G": 11.07
+  },
+  {
+    "monthly_from": 11000.0,
+    "monthly_to": 11049.95,
+    "G": 11.1
+  },
+  {
+    "monthly_from": 11050.0,
+    "monthly_to": 11099.95,
+    "G": 11.13
+  },
+  {
+    "monthly_from": 11100.0,
+    "monthly_to": 11149.95,
+    "G": 11.16
+  },
+  {
+    "monthly_from": 11150.0,
+    "monthly_to": 11199.95,
+    "G": 11.18
+  },
+  {
+    "monthly_from": 11200.0,
+    "monthly_to": 11249.95,
+    "G": 11.21
+  },
+  {
+    "monthly_from": 11250.0,
+    "monthly_to": 11299.95,
+    "G": 11.24
+  },
+  {
+    "monthly_from": 11300.0,
+    "monthly_to": 11349.95,
+    "G": 11.26
+  },
+  {
+    "monthly_from": 11350.0,
+    "monthly_to": 11399.95,
+    "G": 11.29
+  },
+  {
+    "monthly_from": 11400.0,
+    "monthly_to": 11449.95,
+    "G": 11.32
+  },
+  {
+    "monthly_from": 11450.0,
+    "monthly_to": 11499.95,
+    "G": 11.34
+  },
+  {
+    "monthly_from": 11500.0,
+    "monthly_to": 11549.95,
+    "G": 11.37
+  },
+  {
+    "monthly_from": 11550.0,
+    "monthly_to": 11599.95,
+    "G": 11.39
+  },
+  {
+    "monthly_from": 11600.0,
+    "monthly_to": 11649.95,
+    "G": 11.42
+  },
+  {
+    "monthly_from": 11650.0,
+    "monthly_to": 11699.95,
+    "G": 11.44
+  },
+  {
+    "monthly_from": 11700.0,
+    "monthly_to": 11749.95,
+    "G": 11.47
+  },
+  {
+    "monthly_from": 11750.0,
+    "monthly_to": 11799.95,
+    "G": 11.49
+  },
+  {
+    "monthly_from": 11800.0,
+    "monthly_to": 11849.95,
+    "G": 11.52
+  },
+  {
+    "monthly_from": 11850.0,
+    "monthly_to": 11899.95,
+    "G": 11.54
+  },
+  {
+    "monthly_from": 11900.0,
+    "monthly_to": 11949.95,
+    "G": 11.56
+  },
+  {
+    "monthly_from": 11950.0,
+    "monthly_to": 11999.95,
+    "G": 11.59
+  },
+  {
+    "monthly_from": 12000.0,
+    "monthly_to": 12049.95,
+    "G": 11.61
+  },
+  {
+    "monthly_from": 12050.0,
+    "monthly_to": 12099.95,
+    "G": 11.63
+  },
+  {
+    "monthly_from": 12100.0,
+    "monthly_to": 12149.95,
+    "G": 11.66
+  },
+  {
+    "monthly_from": 12150.0,
+    "monthly_to": 12199.95,
+    "G": 11.68
+  },
+  {
+    "monthly_from": 12200.0,
+    "monthly_to": 12249.95,
+    "G": 11.7
+  },
+  {
+    "monthly_from": 12250.0,
+    "monthly_to": 12299.95,
+    "G": 11.72
+  },
+  {
+    "monthly_from": 12300.0,
+    "monthly_to": 12349.95,
+    "G": 11.75
+  },
+  {
+    "monthly_from": 12350.0,
+    "monthly_to": 12399.95,
+    "G": 11.77
+  },
+  {
+    "monthly_from": 12400.0,
+    "monthly_to": 12449.95,
+    "G": 11.79
+  },
+  {
+    "monthly_from": 12450.0,
+    "monthly_to": 12499.95,
+    "G": 11.81
+  },
+  {
+    "monthly_from": 12500.0,
+    "monthly_to": 12549.95,
+    "G": 11.83
+  },
+  {
+    "monthly_from": 12550.0,
+    "monthly_to": 12599.95,
+    "G": 11.85
+  },
+  {
+    "monthly_from": 12600.0,
+    "monthly_to": 12649.95,
+    "G": 11.88
+  },
+  {
+    "monthly_from": 12650.0,
+    "monthly_to": 12699.95,
+    "G": 11.9
+  },
+  {
+    "monthly_from": 12700.0,
+    "monthly_to": 12749.95,
+    "G": 11.92
+  },
+  {
+    "monthly_from": 12750.0,
+    "monthly_to": 12799.95,
+    "G": 11.94
+  },
+  {
+    "monthly_from": 12800.0,
+    "monthly_to": 12849.95,
+    "G": 11.96
+  },
+  {
+    "monthly_from": 12850.0,
+    "monthly_to": 12899.95,
+    "G": 11.98
+  },
+  {
+    "monthly_from": 12900.0,
+    "monthly_to": 12949.95,
+    "G": 12.0
+  },
+  {
+    "monthly_from": 12950.0,
+    "monthly_to": 12999.95,
+    "G": 12.02
+  },
+  {
+    "monthly_from": 13000.0,
+    "monthly_to": 13049.95,
+    "G": 12.04
+  },
+  {
+    "monthly_from": 13050.0,
+    "monthly_to": 13099.95,
+    "G": 12.06
+  },
+  {
+    "monthly_from": 13100.0,
+    "monthly_to": 13149.95,
+    "G": 12.08
+  },
+  {
+    "monthly_from": 13150.0,
+    "monthly_to": 13199.95,
+    "G": 12.1
+  },
+  {
+    "monthly_from": 13200.0,
+    "monthly_to": 13249.95,
+    "G": 12.12
+  },
+  {
+    "monthly_from": 13250.0,
+    "monthly_to": 13299.95,
+    "G": 12.14
+  },
+  {
+    "monthly_from": 13300.0,
+    "monthly_to": 13349.95,
+    "G": 12.15
+  },
+  {
+    "monthly_from": 13350.0,
+    "monthly_to": 13399.95,
+    "G": 12.17
+  },
+  {
+    "monthly_from": 13400.0,
+    "monthly_to": 13449.95,
+    "G": 12.19
+  },
+  {
+    "monthly_from": 13450.0,
+    "monthly_to": 13499.95,
+    "G": 12.21
+  },
+  {
+    "monthly_from": 13500.0,
+    "monthly_to": 13549.95,
+    "G": 12.23
+  },
+  {
+    "monthly_from": 13550.0,
+    "monthly_to": 13599.95,
+    "G": 12.25
+  },
+  {
+    "monthly_from": 13600.0,
+    "monthly_to": 13649.95,
+    "G": 12.27
+  },
+  {
+    "monthly_from": 13650.0,
+    "monthly_to": 13699.95,
+    "G": 12.28
+  },
+  {
+    "monthly_from": 13700.0,
+    "monthly_to": 13749.95,
+    "G": 12.3
+  },
+  {
+    "monthly_from": 13750.0,
+    "monthly_to": 13799.95,
+    "G": 12.32
+  },
+  {
+    "monthly_from": 13800.0,
+    "monthly_to": 13849.95,
+    "G": 12.34
+  },
+  {
+    "monthly_from": 13850.0,
+    "monthly_to": 13899.95,
+    "G": 12.35
+  },
+  {
+    "monthly_from": 13900.0,
+    "monthly_to": 13949.95,
+    "G": 12.37
+  },
+  {
+    "monthly_from": 13950.0,
+    "monthly_to": 13999.95,
+    "G": 12.39
+  },
+  {
+    "monthly_from": 14000.0,
+    "monthly_to": 14049.95,
+    "G": 12.41
+  },
+  {
+    "monthly_from": 14050.0,
+    "monthly_to": 14099.95,
+    "G": 12.42
+  },
+  {
+    "monthly_from": 14100.0,
+    "monthly_to": 14149.95,
+    "G": 12.44
+  },
+  {
+    "monthly_from": 14150.0,
+    "monthly_to": 14199.95,
+    "G": 12.46
+  },
+  {
+    "monthly_from": 14200.0,
+    "monthly_to": 14249.95,
+    "G": 12.47
+  },
+  {
+    "monthly_from": 14250.0,
+    "monthly_to": 14299.95,
+    "G": 12.49
+  },
+  {
+    "monthly_from": 14300.0,
+    "monthly_to": 14349.95,
+    "G": 12.51
+  },
+  {
+    "monthly_from": 14350.0,
+    "monthly_to": 14399.95,
+    "G": 12.52
+  },
+  {
+    "monthly_from": 14400.0,
+    "monthly_to": 14449.95,
+    "G": 12.54
+  },
+  {
+    "monthly_from": 14450.0,
+    "monthly_to": 14499.95,
+    "G": 12.56
+  },
+  {
+    "monthly_from": 14500.0,
+    "monthly_to": 14549.95,
+    "G": 12.57
+  },
+  {
+    "monthly_from": 14550.0,
+    "monthly_to": 14599.95,
+    "G": 12.59
+  },
+  {
+    "monthly_from": 14600.0,
+    "monthly_to": 14649.95,
+    "G": 12.6
+  },
+  {
+    "monthly_from": 14650.0,
+    "monthly_to": 14699.95,
+    "G": 12.62
+  },
+  {
+    "monthly_from": 14700.0,
+    "monthly_to": 14749.95,
+    "G": 12.63
+  },
+  {
+    "monthly_from": 14750.0,
+    "monthly_to": 14799.95,
+    "G": 12.65
+  },
+  {
+    "monthly_from": 14800.0,
+    "monthly_to": 14849.95,
+    "G": 12.67
+  },
+  {
+    "monthly_from": 14850.0,
+    "monthly_to": 14899.95,
+    "G": 12.68
+  },
+  {
+    "monthly_from": 14900.0,
+    "monthly_to": 14949.95,
+    "G": 12.7
+  },
+  {
+    "monthly_from": 14950.0,
+    "monthly_to": 14999.95,
+    "G": 12.71
+  },
+  {
+    "monthly_from": 15000.0,
+    "monthly_to": 15049.95,
+    "G": 12.73
+  },
+  {
+    "monthly_from": 15050.0,
+    "monthly_to": 15099.95,
+    "G": 12.75
+  },
+  {
+    "monthly_from": 15100.0,
+    "monthly_to": 15149.95,
+    "G": 12.78
+  },
+  {
+    "monthly_from": 15150.0,
+    "monthly_to": 15199.95,
+    "G": 12.8
+  },
+  {
+    "monthly_from": 15200.0,
+    "monthly_to": 15249.95,
+    "G": 12.82
+  },
+  {
+    "monthly_from": 15250.0,
+    "monthly_to": 15299.95,
+    "G": 12.85
+  },
+  {
+    "monthly_from": 15300.0,
+    "monthly_to": 15349.95,
+    "G": 12.87
+  },
+  {
+    "monthly_from": 15350.0,
+    "monthly_to": 15399.95,
+    "G": 12.89
+  },
+  {
+    "monthly_from": 15400.0,
+    "monthly_to": 15449.95,
+    "G": 12.91
+  },
+  {
+    "monthly_from": 15450.0,
+    "monthly_to": 15499.95,
+    "G": 12.94
+  },
+  {
+    "monthly_from": 15500.0,
+    "monthly_to": 15549.95,
+    "G": 12.96
+  },
+  {
+    "monthly_from": 15550.0,
+    "monthly_to": 15599.95,
+    "G": 12.98
+  },
+  {
+    "monthly_from": 15600.0,
+    "monthly_to": 15649.95,
+    "G": 13.0
+  },
+  {
+    "monthly_from": 15650.0,
+    "monthly_to": 15699.95,
+    "G": 13.03
+  },
+  {
+    "monthly_from": 15700.0,
+    "monthly_to": 15749.95,
+    "G": 13.05
+  },
+  {
+    "monthly_from": 15750.0,
+    "monthly_to": 15799.95,
+    "G": 13.07
+  },
+  {
+    "monthly_from": 15800.0,
+    "monthly_to": 15849.95,
+    "G": 13.09
+  },
+  {
+    "monthly_from": 15850.0,
+    "monthly_to": 15899.95,
+    "G": 13.11
+  },
+  {
+    "monthly_from": 15900.0,
+    "monthly_to": 15949.95,
+    "G": 13.13
+  },
+  {
+    "monthly_from": 15950.0,
+    "monthly_to": 15999.95,
+    "G": 13.15
+  },
+  {
+    "monthly_from": 16000.0,
+    "monthly_to": 16049.95,
+    "G": 13.17
+  },
+  {
+    "monthly_from": 16050.0,
+    "monthly_to": 16099.95,
+    "G": 13.2
+  },
+  {
+    "monthly_from": 16100.0,
+    "monthly_to": 16149.95,
+    "G": 13.22
+  },
+  {
+    "monthly_from": 16150.0,
+    "monthly_to": 16199.95,
+    "G": 13.24
+  },
+  {
+    "monthly_from": 16200.0,
+    "monthly_to": 16249.95,
+    "G": 13.26
+  },
+  {
+    "monthly_from": 16250.0,
+    "monthly_to": 16299.95,
+    "G": 13.28
+  },
+  {
+    "monthly_from": 16300.0,
+    "monthly_to": 16349.95,
+    "G": 13.3
+  },
+  {
+    "monthly_from": 16350.0,
+    "monthly_to": 16399.95,
+    "G": 13.32
+  },
+  {
+    "monthly_from": 16400.0,
+    "monthly_to": 16449.95,
+    "G": 13.34
+  },
+  {
+    "monthly_from": 16450.0,
+    "monthly_to": 16499.95,
+    "G": 13.36
+  },
+  {
+    "monthly_from": 16500.0,
+    "monthly_to": 16549.95,
+    "G": 13.38
+  },
+  {
+    "monthly_from": 16550.0,
+    "monthly_to": 16599.95,
+    "G": 13.4
+  },
+  {
+    "monthly_from": 16600.0,
+    "monthly_to": 16649.95,
+    "G": 13.42
+  },
+  {
+    "monthly_from": 16650.0,
+    "monthly_to": 16699.95,
+    "G": 13.43
+  },
+  {
+    "monthly_from": 16700.0,
+    "monthly_to": 16749.95,
+    "G": 13.45
+  },
+  {
+    "monthly_from": 16750.0,
+    "monthly_to": 16799.95,
+    "G": 13.47
+  },
+  {
+    "monthly_from": 16800.0,
+    "monthly_to": 16849.95,
+    "G": 13.49
+  },
+  {
+    "monthly_from": 16850.0,
+    "monthly_to": 16899.95,
+    "G": 13.51
+  },
+  {
+    "monthly_from": 16900.0,
+    "monthly_to": 16949.95,
+    "G": 13.53
+  },
+  {
+    "monthly_from": 16950.0,
+    "monthly_to": 16999.95,
+    "G": 13.55
+  },
+  {
+    "monthly_from": 17000.0,
+    "monthly_to": 17049.95,
+    "G": 13.57
+  },
+  {
+    "monthly_from": 17050.0,
+    "monthly_to": 17099.95,
+    "G": 13.58
+  },
+  {
+    "monthly_from": 17100.0,
+    "monthly_to": 17149.95,
+    "G": 13.6
+  },
+  {
+    "monthly_from": 17150.0,
+    "monthly_to": 17199.95,
+    "G": 13.62
+  },
+  {
+    "monthly_from": 17200.0,
+    "monthly_to": 17249.95,
+    "G": 13.64
+  },
+  {
+    "monthly_from": 17250.0,
+    "monthly_to": 17299.95,
+    "G": 13.66
+  },
+  {
+    "monthly_from": 17300.0,
+    "monthly_to": 17349.95,
+    "G": 13.68
+  },
+  {
+    "monthly_from": 17350.0,
+    "monthly_to": 17399.95,
+    "G": 13.69
+  },
+  {
+    "monthly_from": 17400.0,
+    "monthly_to": 17449.95,
+    "G": 13.71
+  },
+  {
+    "monthly_from": 17450.0,
+    "monthly_to": 17499.95,
+    "G": 13.73
+  },
+  {
+    "monthly_from": 17500.0,
+    "monthly_to": 17549.95,
+    "G": 13.75
+  },
+  {
+    "monthly_from": 17550.0,
+    "monthly_to": 17599.95,
+    "G": 13.76
+  },
+  {
+    "monthly_from": 17600.0,
+    "monthly_to": 17649.95,
+    "G": 13.78
+  },
+  {
+    "monthly_from": 17650.0,
+    "monthly_to": 17699.95,
+    "G": 13.8
+  },
+  {
+    "monthly_from": 17700.0,
+    "monthly_to": 17749.95,
+    "G": 13.81
+  },
+  {
+    "monthly_from": 17750.0,
+    "monthly_to": 17799.95,
+    "G": 13.83
+  },
+  {
+    "monthly_from": 17800.0,
+    "monthly_to": 17849.95,
+    "G": 13.85
+  },
+  {
+    "monthly_from": 17850.0,
+    "monthly_to": 17899.95,
+    "G": 13.87
+  },
+  {
+    "monthly_from": 17900.0,
+    "monthly_to": 17949.95,
+    "G": 13.88
+  },
+  {
+    "monthly_from": 17950.0,
+    "monthly_to": 17999.95,
+    "G": 13.9
+  },
+  {
+    "monthly_from": 18000.0,
+    "monthly_to": 18049.95,
+    "G": 13.92
+  },
+  {
+    "monthly_from": 18050.0,
+    "monthly_to": 18099.95,
+    "G": 13.93
+  },
+  {
+    "monthly_from": 18100.0,
+    "monthly_to": 18149.95,
+    "G": 13.95
+  },
+  {
+    "monthly_from": 18150.0,
+    "monthly_to": 18199.95,
+    "G": 13.96
+  },
+  {
+    "monthly_from": 18200.0,
+    "monthly_to": 18249.95,
+    "G": 13.98
+  },
+  {
+    "monthly_from": 18250.0,
+    "monthly_to": 18299.95,
+    "G": 14.0
+  },
+  {
+    "monthly_from": 18300.0,
+    "monthly_to": 18349.95,
+    "G": 14.01
+  },
+  {
+    "monthly_from": 18350.0,
+    "monthly_to": 18399.95,
+    "G": 14.03
+  },
+  {
+    "monthly_from": 18400.0,
+    "monthly_to": 18449.95,
+    "G": 14.04
+  },
+  {
+    "monthly_from": 18450.0,
+    "monthly_to": 18499.95,
+    "G": 14.06
+  },
+  {
+    "monthly_from": 18500.0,
+    "monthly_to": 18549.95,
+    "G": 14.08
+  },
+  {
+    "monthly_from": 18550.0,
+    "monthly_to": 18599.95,
+    "G": 14.09
+  },
+  {
+    "monthly_from": 18600.0,
+    "monthly_to": 18649.95,
+    "G": 14.11
+  },
+  {
+    "monthly_from": 18650.0,
+    "monthly_to": 18699.95,
+    "G": 14.12
+  },
+  {
+    "monthly_from": 18700.0,
+    "monthly_to": 18749.95,
+    "G": 14.14
+  },
+  {
+    "monthly_from": 18750.0,
+    "monthly_to": 18799.95,
+    "G": 14.15
+  },
+  {
+    "monthly_from": 18800.0,
+    "monthly_to": 18849.95,
+    "G": 14.17
+  },
+  {
+    "monthly_from": 18850.0,
+    "monthly_to": 18899.95,
+    "G": 14.18
+  },
+  {
+    "monthly_from": 18900.0,
+    "monthly_to": 18949.95,
+    "G": 14.2
+  },
+  {
+    "monthly_from": 18950.0,
+    "monthly_to": 18999.95,
+    "G": 14.21
+  },
+  {
+    "monthly_from": 19000.0,
+    "monthly_to": 19049.95,
+    "G": 14.23
+  },
+  {
+    "monthly_from": 19050.0,
+    "monthly_to": 19099.95,
+    "G": 14.24
+  },
+  {
+    "monthly_from": 19100.0,
+    "monthly_to": 19149.95,
+    "G": 14.26
+  },
+  {
+    "monthly_from": 19150.0,
+    "monthly_to": 19199.95,
+    "G": 14.27
+  },
+  {
+    "monthly_from": 19200.0,
+    "monthly_to": 19249.95,
+    "G": 14.29
+  },
+  {
+    "monthly_from": 19250.0,
+    "monthly_to": 19299.95,
+    "G": 14.3
+  },
+  {
+    "monthly_from": 19300.0,
+    "monthly_to": 19349.95,
+    "G": 14.31
+  },
+  {
+    "monthly_from": 19350.0,
+    "monthly_to": 19399.95,
+    "G": 14.33
+  },
+  {
+    "monthly_from": 19400.0,
+    "monthly_to": 19449.95,
+    "G": 14.34
+  },
+  {
+    "monthly_from": 19450.0,
+    "monthly_to": 19499.95,
+    "G": 14.36
+  },
+  {
+    "monthly_from": 19500.0,
+    "monthly_to": 19549.95,
+    "G": 14.37
+  },
+  {
+    "monthly_from": 19550.0,
+    "monthly_to": 19599.95,
+    "G": 14.39
+  },
+  {
+    "monthly_from": 19600.0,
+    "monthly_to": 19649.95,
+    "G": 14.4
+  },
+  {
+    "monthly_from": 19650.0,
+    "monthly_to": 19749.95,
+    "G": 14.42
+  },
+  {
+    "monthly_from": 19750.0,
+    "monthly_to": 19849.95,
+    "G": 14.45
+  },
+  {
+    "monthly_from": 19850.0,
+    "monthly_to": 19949.95,
+    "G": 14.47
+  },
+  {
+    "monthly_from": 19950.0,
+    "monthly_to": 20049.95,
+    "G": 14.5
+  },
+  {
+    "monthly_from": 20050.0,
+    "monthly_to": 20149.95,
+    "G": 14.53
+  },
+  {
+    "monthly_from": 20150.0,
+    "monthly_to": 20249.95,
+    "G": 14.55
+  },
+  {
+    "monthly_from": 20250.0,
+    "monthly_to": 20349.95,
+    "G": 14.58
+  },
+  {
+    "monthly_from": 20350.0,
+    "monthly_to": 20449.95,
+    "G": 14.61
+  },
+  {
+    "monthly_from": 20450.0,
+    "monthly_to": 20549.95,
+    "G": 14.63
+  },
+  {
+    "monthly_from": 20550.0,
+    "monthly_to": 20649.95,
+    "G": 14.66
+  },
+  {
+    "monthly_from": 20650.0,
+    "monthly_to": 20749.95,
+    "G": 14.68
+  },
+  {
+    "monthly_from": 20750.0,
+    "monthly_to": 20849.95,
+    "G": 14.71
+  },
+  {
+    "monthly_from": 20850.0,
+    "monthly_to": 20949.95,
+    "G": 14.73
+  },
+  {
+    "monthly_from": 20950.0,
+    "monthly_to": 21049.95,
+    "G": 14.76
+  },
+  {
+    "monthly_from": 21050.0,
+    "monthly_to": 21149.95,
+    "G": 14.78
+  },
+  {
+    "monthly_from": 21150.0,
+    "monthly_to": 21249.95,
+    "G": 14.8
+  },
+  {
+    "monthly_from": 21250.0,
+    "monthly_to": 21349.95,
+    "G": 14.83
+  },
+  {
+    "monthly_from": 21350.0,
+    "monthly_to": 21449.95,
+    "G": 14.85
+  },
+  {
+    "monthly_from": 21450.0,
+    "monthly_to": 21549.95,
+    "G": 14.87
+  },
+  {
+    "monthly_from": 21550.0,
+    "monthly_to": 21649.95,
+    "G": 14.9
+  },
+  {
+    "monthly_from": 21650.0,
+    "monthly_to": 21749.95,
+    "G": 14.92
+  },
+  {
+    "monthly_from": 21750.0,
+    "monthly_to": 21849.95,
+    "G": 14.94
+  },
+  {
+    "monthly_from": 21850.0,
+    "monthly_to": 21949.95,
+    "G": 14.97
+  },
+  {
+    "monthly_from": 21950.0,
+    "monthly_to": 22049.95,
+    "G": 14.99
+  },
+  {
+    "monthly_from": 22050.0,
+    "monthly_to": 22149.95,
+    "G": 15.01
+  },
+  {
+    "monthly_from": 22150.0,
+    "monthly_to": 22249.95,
+    "G": 15.03
+  },
+  {
+    "monthly_from": 22250.0,
+    "monthly_to": 22349.95,
+    "G": 15.05
+  },
+  {
+    "monthly_from": 22350.0,
+    "monthly_to": 22449.95,
+    "G": 15.07
+  },
+  {
+    "monthly_from": 22450.0,
+    "monthly_to": 22549.95,
+    "G": 15.1
+  },
+  {
+    "monthly_from": 22550.0,
+    "monthly_to": 22649.95,
+    "G": 15.12
+  },
+  {
+    "monthly_from": 22650.0,
+    "monthly_to": 22749.95,
+    "G": 15.14
+  },
+  {
+    "monthly_from": 22750.0,
+    "monthly_to": 22849.95,
+    "G": 15.16
+  },
+  {
+    "monthly_from": 22850.0,
+    "monthly_to": 22949.95,
+    "G": 15.18
+  },
+  {
+    "monthly_from": 22950.0,
+    "monthly_to": 23049.95,
+    "G": 15.2
+  },
+  {
+    "monthly_from": 23050.0,
+    "monthly_to": 23149.95,
+    "G": 15.22
+  },
+  {
+    "monthly_from": 23150.0,
+    "monthly_to": 23249.95,
+    "G": 15.24
+  },
+  {
+    "monthly_from": 23250.0,
+    "monthly_to": 23349.95,
+    "G": 15.26
+  },
+  {
+    "monthly_from": 23350.0,
+    "monthly_to": 23449.95,
+    "G": 15.28
+  },
+  {
+    "monthly_from": 23450.0,
+    "monthly_to": 23549.95,
+    "G": 15.3
+  },
+  {
+    "monthly_from": 23550.0,
+    "monthly_to": 23649.95,
+    "G": 15.32
+  },
+  {
+    "monthly_from": 23650.0,
+    "monthly_to": 23749.95,
+    "G": 15.34
+  },
+  {
+    "monthly_from": 23750.0,
+    "monthly_to": 23849.95,
+    "G": 15.36
+  },
+  {
+    "monthly_from": 23850.0,
+    "monthly_to": 23949.95,
+    "G": 15.37
+  },
+  {
+    "monthly_from": 23950.0,
+    "monthly_to": 24049.95,
+    "G": 15.39
+  },
+  {
+    "monthly_from": 24050.0,
+    "monthly_to": 24149.95,
+    "G": 15.41
+  },
+  {
+    "monthly_from": 24150.0,
+    "monthly_to": 24249.95,
+    "G": 15.43
+  },
+  {
+    "monthly_from": 24250.0,
+    "monthly_to": 24349.95,
+    "G": 15.45
+  },
+  {
+    "monthly_from": 24350.0,
+    "monthly_to": 24449.95,
+    "G": 15.47
+  },
+  {
+    "monthly_from": 24450.0,
+    "monthly_to": 24549.95,
+    "G": 15.48
+  },
+  {
+    "monthly_from": 24550.0,
+    "monthly_to": 24649.95,
+    "G": 15.5
+  },
+  {
+    "monthly_from": 24650.0,
+    "monthly_to": 24749.95,
+    "G": 15.52
+  },
+  {
+    "monthly_from": 24750.0,
+    "monthly_to": 24849.95,
+    "G": 15.54
+  },
+  {
+    "monthly_from": 24850.0,
+    "monthly_to": 24949.95,
+    "G": 15.55
+  },
+  {
+    "monthly_from": 24950.0,
+    "monthly_to": 25049.95,
+    "G": 15.57
+  },
+  {
+    "monthly_from": 25050.0,
+    "monthly_to": 25149.95,
+    "G": 15.59
+  },
+  {
+    "monthly_from": 25150.0,
+    "monthly_to": 25249.95,
+    "G": 15.6
+  },
+  {
+    "monthly_from": 25250.0,
+    "monthly_to": 25349.95,
+    "G": 15.62
+  },
+  {
+    "monthly_from": 25350.0,
+    "monthly_to": 25449.95,
+    "G": 15.64
+  },
+  {
+    "monthly_from": 25450.0,
+    "monthly_to": 25549.95,
+    "G": 15.65
+  },
+  {
+    "monthly_from": 25550.0,
+    "monthly_to": 25649.95,
+    "G": 15.67
+  },
+  {
+    "monthly_from": 25650.0,
+    "monthly_to": 25749.95,
+    "G": 15.69
+  },
+  {
+    "monthly_from": 25750.0,
+    "monthly_to": 25849.95,
+    "G": 15.7
+  },
+  {
+    "monthly_from": 25850.0,
+    "monthly_to": 25949.95,
+    "G": 15.72
+  },
+  {
+    "monthly_from": 25950.0,
+    "monthly_to": 26049.95,
+    "G": 15.74
+  },
+  {
+    "monthly_from": 26050.0,
+    "monthly_to": 26149.95,
+    "G": 15.75
+  },
+  {
+    "monthly_from": 26150.0,
+    "monthly_to": 26249.95,
+    "G": 15.77
+  },
+  {
+    "monthly_from": 26250.0,
+    "monthly_to": 26349.95,
+    "G": 15.78
+  },
+  {
+    "monthly_from": 26350.0,
+    "monthly_to": 26449.95,
+    "G": 15.8
+  },
+  {
+    "monthly_from": 26450.0,
+    "monthly_to": 26549.95,
+    "G": 15.81
+  },
+  {
+    "monthly_from": 26550.0,
+    "monthly_to": 26649.95,
+    "G": 15.83
+  },
+  {
+    "monthly_from": 26650.0,
+    "monthly_to": 26749.95,
+    "G": 15.84
+  },
+  {
+    "monthly_from": 26750.0,
+    "monthly_to": 26849.95,
+    "G": 15.86
+  },
+  {
+    "monthly_from": 26850.0,
+    "monthly_to": 26949.95,
+    "G": 15.87
+  },
+  {
+    "monthly_from": 26950.0,
+    "monthly_to": 27049.95,
+    "G": 15.89
+  },
+  {
+    "monthly_from": 27050.0,
+    "monthly_to": 27149.95,
+    "G": 15.9
+  },
+  {
+    "monthly_from": 27150.0,
+    "monthly_to": 27249.95,
+    "G": 15.92
+  },
+  {
+    "monthly_from": 27250.0,
+    "monthly_to": 27349.95,
+    "G": 15.93
+  },
+  {
+    "monthly_from": 27350.0,
+    "monthly_to": 27449.95,
+    "G": 15.95
+  },
+  {
+    "monthly_from": 27450.0,
+    "monthly_to": 27549.95,
+    "G": 15.96
+  },
+  {
+    "monthly_from": 27550.0,
+    "monthly_to": 27649.95,
+    "G": 15.97
+  },
+  {
+    "monthly_from": 27650.0,
+    "monthly_to": 27749.95,
+    "G": 15.99
+  },
+  {
+    "monthly_from": 27750.0,
+    "monthly_to": 27849.95,
+    "G": 16.0
+  },
+  {
+    "monthly_from": 27850.0,
+    "monthly_to": 27949.95,
+    "G": 16.02
+  },
+  {
+    "monthly_from": 27950.0,
+    "monthly_to": 28049.95,
+    "G": 16.03
+  },
+  {
+    "monthly_from": 28050.0,
+    "monthly_to": 28149.95,
+    "G": 16.04
+  },
+  {
+    "monthly_from": 28150.0,
+    "monthly_to": 28249.95,
+    "G": 16.06
+  },
+  {
+    "monthly_from": 28250.0,
+    "monthly_to": 28349.95,
+    "G": 16.07
+  },
+  {
+    "monthly_from": 28350.0,
+    "monthly_to": 28449.95,
+    "G": 16.08
+  },
+  {
+    "monthly_from": 28450.0,
+    "monthly_to": 28549.95,
+    "G": 16.1
+  },
+  {
+    "monthly_from": 28550.0,
+    "monthly_to": 28649.95,
+    "G": 16.11
+  },
+  {
+    "monthly_from": 28650.0,
+    "monthly_to": 28749.95,
+    "G": 16.12
+  },
+  {
+    "monthly_from": 28750.0,
+    "monthly_to": 28849.95,
+    "G": 16.14
+  },
+  {
+    "monthly_from": 28850.0,
+    "monthly_to": 28949.95,
+    "G": 16.15
+  },
+  {
+    "monthly_from": 28950.0,
+    "monthly_to": 29049.95,
+    "G": 16.16
+  },
+  {
+    "monthly_from": 29050.0,
+    "monthly_to": 29149.95,
+    "G": 16.17
+  },
+  {
+    "monthly_from": 29150.0,
+    "monthly_to": 29249.95,
+    "G": 16.19
+  },
+  {
+    "monthly_from": 29250.0,
+    "monthly_to": 29349.95,
+    "G": 16.2
+  },
+  {
+    "monthly_from": 29350.0,
+    "monthly_to": 29449.95,
+    "G": 16.21
+  },
+  {
+    "monthly_from": 29450.0,
+    "monthly_to": 29549.95,
+    "G": 16.22
+  },
+  {
+    "monthly_from": 29550.0,
+    "monthly_to": 29649.95,
+    "G": 16.24
+  },
+  {
+    "monthly_from": 29650.0,
+    "monthly_to": 29749.95,
+    "G": 16.25
+  },
+  {
+    "monthly_from": 29750.0,
+    "monthly_to": 29849.95,
+    "G": 16.26
+  },
+  {
+    "monthly_from": 29850.0,
+    "monthly_to": 29949.95,
+    "G": 16.27
+  },
+  {
+    "monthly_from": 29950.0,
+    "monthly_to": 30049.95,
+    "G": 16.28
+  },
+  {
+    "monthly_from": 30050.0,
+    "monthly_to": 30149.95,
+    "G": 16.3
+  },
+  {
+    "monthly_from": 30150.0,
+    "monthly_to": 30249.95,
+    "G": 16.31
+  },
+  {
+    "monthly_from": 30250.0,
+    "monthly_to": 30349.95,
+    "G": 16.32
+  },
+  {
+    "monthly_from": 30350.0,
+    "monthly_to": 30449.95,
+    "G": 16.33
+  },
+  {
+    "monthly_from": 30450.0,
+    "monthly_to": 30549.95,
+    "G": 16.34
+  },
+  {
+    "monthly_from": 30550.0,
+    "monthly_to": 30649.95,
+    "G": 16.35
+  },
+  {
+    "monthly_from": 30650.0,
+    "monthly_to": 30749.95,
+    "G": 16.37
+  },
+  {
+    "monthly_from": 30750.0,
+    "monthly_to": 30849.95,
+    "G": 16.38
+  },
+  {
+    "monthly_from": 30850.0,
+    "monthly_to": 30949.95,
+    "G": 16.39
+  },
+  {
+    "monthly_from": 30950.0,
+    "monthly_to": 31049.95,
+    "G": 16.4
+  },
+  {
+    "monthly_from": 31050.0,
+    "monthly_to": 31149.95,
+    "G": 16.41
+  },
+  {
+    "monthly_from": 31150.0,
+    "monthly_to": 31249.95,
+    "G": 16.42
+  },
+  {
+    "monthly_from": 31250.0,
+    "monthly_to": 31349.95,
+    "G": 16.43
+  },
+  {
+    "monthly_from": 31350.0,
+    "monthly_to": 31449.95,
+    "G": 16.44
+  },
+  {
+    "monthly_from": 31450.0,
+    "monthly_to": 31549.95,
+    "G": 16.45
+  },
+  {
+    "monthly_from": 31550.0,
+    "monthly_to": 31649.95,
+    "G": 16.46
+  },
+  {
+    "monthly_from": 31650.0,
+    "monthly_to": 31749.95,
+    "G": 16.48
+  },
+  {
+    "monthly_from": 31750.0,
+    "monthly_to": 31849.95,
+    "G": 16.49
+  },
+  {
+    "monthly_from": 31850.0,
+    "monthly_to": 31949.95,
+    "G": 16.5
+  },
+  {
+    "monthly_from": 31950.0,
+    "monthly_to": 32049.95,
+    "G": 16.51
+  },
+  {
+    "monthly_from": 32050.0,
+    "monthly_to": 32149.95,
+    "G": 16.52
+  },
+  {
+    "monthly_from": 32150.0,
+    "monthly_to": 32249.95,
+    "G": 16.53
+  },
+  {
+    "monthly_from": 32250.0,
+    "monthly_to": 32349.95,
+    "G": 16.54
+  },
+  {
+    "monthly_from": 32350.0,
+    "monthly_to": 32449.95,
+    "G": 16.55
+  },
+  {
+    "monthly_from": 32450.0,
+    "monthly_to": 32549.95,
+    "G": 16.56
+  },
+  {
+    "monthly_from": 32550.0,
+    "monthly_to": 32649.95,
+    "G": 16.57
+  },
+  {
+    "monthly_from": 32650.0,
+    "monthly_to": 32749.95,
+    "G": 16.58
+  },
+  {
+    "monthly_from": 32750.0,
+    "monthly_to": 32849.95,
+    "G": 16.59
+  },
+  {
+    "monthly_from": 32850.0,
+    "monthly_to": 32949.95,
+    "G": 16.6
+  },
+  {
+    "monthly_from": 32950.0,
+    "monthly_to": 33049.95,
+    "G": 16.61
+  },
+  {
+    "monthly_from": 33050.0,
+    "monthly_to": 33149.95,
+    "G": 16.62
+  },
+  {
+    "monthly_from": 33150.0,
+    "monthly_to": 33249.95,
+    "G": 16.63
+  },
+  {
+    "monthly_from": 33250.0,
+    "monthly_to": 33349.95,
+    "G": 16.64
+  },
+  {
+    "monthly_from": 33350.0,
+    "monthly_to": 33449.95,
+    "G": 16.65
+  },
+  {
+    "monthly_from": 33450.0,
+    "monthly_to": 33549.95,
+    "G": 16.66
+  },
+  {
+    "monthly_from": 33550.0,
+    "monthly_to": 33649.95,
+    "G": 16.67
+  },
+  {
+    "monthly_from": 33650.0,
+    "monthly_to": 33749.95,
+    "G": 16.68
+  },
+  {
+    "monthly_from": 33750.0,
+    "monthly_to": 33949.95,
+    "G": 16.69
+  },
+  {
+    "monthly_from": 33950.0,
+    "monthly_to": 34049.95,
+    "G": 16.7
+  },
+  {
+    "monthly_from": 34050.0,
+    "monthly_to": 34149.95,
+    "G": 16.71
+  },
+  {
+    "monthly_from": 34150.0,
+    "monthly_to": 34249.95,
+    "G": 16.72
+  },
+  {
+    "monthly_from": 34250.0,
+    "monthly_to": 34349.95,
+    "G": 16.73
+  },
+  {
+    "monthly_from": 34350.0,
+    "monthly_to": 34449.95,
+    "G": 16.74
+  },
+  {
+    "monthly_from": 34450.0,
+    "monthly_to": 34549.95,
+    "G": 16.75
+  },
+  {
+    "monthly_from": 34550.0,
+    "monthly_to": 34649.95,
+    "G": 16.76
+  },
+  {
+    "monthly_from": 34650.0,
+    "monthly_to": 34749.95,
+    "G": 16.77
+  },
+  {
+    "monthly_from": 34750.0,
+    "monthly_to": 34949.95,
+    "G": 16.78
+  },
+  {
+    "monthly_from": 34950.0,
+    "monthly_to": 35049.95,
+    "G": 16.79
+  },
+  {
+    "monthly_from": 35050.0,
+    "monthly_to": 35149.95,
+    "G": 16.8
+  },
+  {
+    "monthly_from": 35150.0,
+    "monthly_to": 35249.95,
+    "G": 16.81
+  },
+  {
+    "monthly_from": 35250.0,
+    "monthly_to": 35349.95,
+    "G": 16.82
+  },
+  {
+    "monthly_from": 35350.0,
+    "monthly_to": 35449.95,
+    "G": 16.83
+  },
+  {
+    "monthly_from": 35450.0,
+    "monthly_to": 35549.95,
+    "G": 16.84
+  },
+  {
+    "monthly_from": 35550.0,
+    "monthly_to": 35749.95,
+    "G": 16.85
+  },
+  {
+    "monthly_from": 35750.0,
+    "monthly_to": 35849.95,
+    "G": 16.86
+  },
+  {
+    "monthly_from": 35850.0,
+    "monthly_to": 35949.95,
+    "G": 16.87
+  },
+  {
+    "monthly_from": 35950.0,
+    "monthly_to": 36049.95,
+    "G": 16.88
+  },
+  {
+    "monthly_from": 36050.0,
+    "monthly_to": 36249.95,
+    "G": 16.89
+  },
+  {
+    "monthly_from": 36250.0,
+    "monthly_to": 36349.95,
+    "G": 16.9
+  },
+  {
+    "monthly_from": 36350.0,
+    "monthly_to": 36449.95,
+    "G": 16.91
+  },
+  {
+    "monthly_from": 36450.0,
+    "monthly_to": 36549.95,
+    "G": 16.92
+  },
+  {
+    "monthly_from": 36550.0,
+    "monthly_to": 36649.95,
+    "G": 16.93
+  },
+  {
+    "monthly_from": 36650.0,
+    "monthly_to": 36849.95,
+    "G": 16.94
+  },
+  {
+    "monthly_from": 36850.0,
+    "monthly_to": 36949.95,
+    "G": 16.95
+  },
+  {
+    "monthly_from": 36950.0,
+    "monthly_to": 37049.95,
+    "G": 16.96
+  },
+  {
+    "monthly_from": 37050.0,
+    "monthly_to": 37249.95,
+    "G": 16.97
+  },
+  {
+    "monthly_from": 37250.0,
+    "monthly_to": 37349.95,
+    "G": 16.98
+  },
+  {
+    "monthly_from": 37350.0,
+    "monthly_to": 37449.95,
+    "G": 16.99
+  },
+  {
+    "monthly_from": 37450.0,
+    "monthly_to": 37649.95,
+    "G": 17.0
+  },
+  {
+    "monthly_from": 37650.0,
+    "monthly_to": 37749.95,
+    "G": 17.01
+  },
+  {
+    "monthly_from": 37750.0,
+    "monthly_to": 37849.95,
+    "G": 17.02
+  },
+  {
+    "monthly_from": 37850.0,
+    "monthly_to": 38049.95,
+    "G": 17.03
+  },
+  {
+    "monthly_from": 38050.0,
+    "monthly_to": 38149.95,
+    "G": 17.04
+  },
+  {
+    "monthly_from": 38150.0,
+    "monthly_to": 38249.95,
+    "G": 17.05
+  },
+  {
+    "monthly_from": 38250.0,
+    "monthly_to": 38449.95,
+    "G": 17.06
+  },
+  {
+    "monthly_from": 38450.0,
+    "monthly_to": 38549.95,
+    "G": 17.07
+  },
+  {
+    "monthly_from": 38550.0,
+    "monthly_to": 38649.95,
+    "G": 17.08
+  },
+  {
+    "monthly_from": 38650.0,
+    "monthly_to": 38849.95,
+    "G": 17.09
+  },
+  {
+    "monthly_from": 38850.0,
+    "monthly_to": 38949.95,
+    "G": 17.1
+  },
+  {
+    "monthly_from": 38950.0,
+    "monthly_to": 39149.95,
+    "G": 17.11
+  },
+  {
+    "monthly_from": 39150.0,
+    "monthly_to": 39249.95,
+    "G": 17.12
+  },
+  {
+    "monthly_from": 39250.0,
+    "monthly_to": 39449.95,
+    "G": 17.13
+  },
+  {
+    "monthly_from": 39450.0,
+    "monthly_to": 39549.95,
+    "G": 17.14
+  },
+  {
+    "monthly_from": 39550.0,
+    "monthly_to": 39649.95,
+    "G": 17.15
+  },
+  {
+    "monthly_from": 39650.0,
+    "monthly_to": 39849.95,
+    "G": 17.16
+  },
+  {
+    "monthly_from": 39850.0,
+    "monthly_to": 39949.95,
+    "G": 17.17
+  },
+  {
+    "monthly_from": 39950.0,
+    "monthly_to": 40149.95,
+    "G": 17.18
+  },
+  {
+    "monthly_from": 40150.0,
+    "monthly_to": 40249.95,
+    "G": 17.19
+  },
+  {
+    "monthly_from": 40250.0,
+    "monthly_to": 40449.95,
+    "G": 17.2
+  },
+  {
+    "monthly_from": 40450.0,
+    "monthly_to": 40549.95,
+    "G": 17.21
+  },
+  {
+    "monthly_from": 40550.0,
+    "monthly_to": 40749.95,
+    "G": 17.22
+  },
+  {
+    "monthly_from": 40750.0,
+    "monthly_to": 40949.95,
+    "G": 17.23
+  },
+  {
+    "monthly_from": 40950.0,
+    "monthly_to": 41049.95,
+    "G": 17.24
+  },
+  {
+    "monthly_from": 41050.0,
+    "monthly_to": 41249.95,
+    "G": 17.25
+  },
+  {
+    "monthly_from": 41250.0,
+    "monthly_to": 41349.95,
+    "G": 17.26
+  },
+  {
+    "monthly_from": 41350.0,
+    "monthly_to": 41549.95,
+    "G": 17.27
+  },
+  {
+    "monthly_from": 41550.0,
+    "monthly_to": 41749.95,
+    "G": 17.28
+  },
+  {
+    "monthly_from": 41750.0,
+    "monthly_to": 41849.95,
+    "G": 17.29
+  },
+  {
+    "monthly_from": 41850.0,
+    "monthly_to": 42049.95,
+    "G": 17.3
+  },
+  {
+    "monthly_from": 42050.0,
+    "monthly_to": 42149.95,
+    "G": 17.31
+  },
+  {
+    "monthly_from": 42150.0,
+    "monthly_to": 42349.95,
+    "G": 17.32
+  },
+  {
+    "monthly_from": 42350.0,
+    "monthly_to": 42549.95,
+    "G": 17.33
+  },
+  {
+    "monthly_from": 42550.0,
+    "monthly_to": 42749.95,
+    "G": 17.34
+  },
+  {
+    "monthly_from": 42750.0,
+    "monthly_to": 42849.95,
+    "G": 17.35
+  },
+  {
+    "monthly_from": 42850.0,
+    "monthly_to": 43049.95,
+    "G": 17.36
+  },
+  {
+    "monthly_from": 43050.0,
+    "monthly_to": 43249.95,
+    "G": 17.37
+  },
+  {
+    "monthly_from": 43250.0,
+    "monthly_to": 43349.95,
+    "G": 17.38
+  },
+  {
+    "monthly_from": 43350.0,
+    "monthly_to": 43549.95,
+    "G": 17.39
+  },
+  {
+    "monthly_from": 43550.0,
+    "monthly_to": 43749.95,
+    "G": 17.4
+  },
+  {
+    "monthly_from": 43750.0,
+    "monthly_to": 43949.95,
+    "G": 17.41
+  },
+  {
+    "monthly_from": 43950.0,
+    "monthly_to": 44149.95,
+    "G": 17.42
+  },
+  {
+    "monthly_from": 44150.0,
+    "monthly_to": 44249.95,
+    "G": 17.43
+  },
+  {
+    "monthly_from": 44250.0,
+    "monthly_to": 44449.95,
+    "G": 17.44
+  },
+  {
+    "monthly_from": 44450.0,
+    "monthly_to": 44649.95,
+    "G": 17.45
+  },
+  {
+    "monthly_from": 44650.0,
+    "monthly_to": 44849.95,
+    "G": 17.46
+  },
+  {
+    "monthly_from": 44850.0,
+    "monthly_to": 45049.95,
+    "G": 17.47
+  },
+  {
+    "monthly_from": 45050.0,
+    "monthly_to": 45249.95,
+    "G": 17.48
+  },
+  {
+    "monthly_from": 45250.0,
+    "monthly_to": 45449.95,
+    "G": 17.49
+  },
+  {
+    "monthly_from": 45450.0,
+    "monthly_to": 45649.95,
+    "G": 17.5
+  },
+  {
+    "monthly_from": 45650.0,
+    "monthly_to": 45849.95,
+    "G": 17.51
+  },
+  {
+    "monthly_from": 45850.0,
+    "monthly_to": 46049.95,
+    "G": 17.52
+  },
+  {
+    "monthly_from": 46050.0,
+    "monthly_to": 46249.95,
+    "G": 17.53
+  },
+  {
+    "monthly_from": 46250.0,
+    "monthly_to": 46449.95,
+    "G": 17.54
+  },
+  {
+    "monthly_from": 46450.0,
+    "monthly_to": 46649.95,
+    "G": 17.55
+  },
+  {
+    "monthly_from": 46650.0,
+    "monthly_to": 46849.95,
+    "G": 17.56
+  },
+  {
+    "monthly_from": 46850.0,
+    "monthly_to": 47049.95,
+    "G": 17.57
+  },
+  {
+    "monthly_from": 47050.0,
+    "monthly_to": 47249.95,
+    "G": 17.58
+  },
+  {
+    "monthly_from": 47250.0,
+    "monthly_to": 47449.95,
+    "G": 17.59
+  },
+  {
+    "monthly_from": 47450.0,
+    "monthly_to": 47649.95,
+    "G": 17.6
+  },
+  {
+    "monthly_from": 47650.0,
+    "monthly_to": 47849.95,
+    "G": 17.61
+  },
+  {
+    "monthly_from": 47850.0,
+    "monthly_to": 48049.95,
+    "G": 17.62
+  },
+  {
+    "monthly_from": 48050.0,
+    "monthly_to": 48249.95,
+    "G": 17.63
+  },
+  {
+    "monthly_from": 48250.0,
+    "monthly_to": 48549.95,
+    "G": 17.64
+  },
+  {
+    "monthly_from": 48550.0,
+    "monthly_to": 48749.95,
+    "G": 17.65
+  },
+  {
+    "monthly_from": 48750.0,
+    "monthly_to": 48949.95,
+    "G": 17.66
+  },
+  {
+    "monthly_from": 48950.0,
+    "monthly_to": 49149.95,
+    "G": 17.67
+  },
+  {
+    "monthly_from": 49150.0,
+    "monthly_to": 49349.95,
+    "G": 17.68
+  },
+  {
+    "monthly_from": 49350.0,
+    "monthly_to": 49549.95,
+    "G": 17.69
+  },
+  {
+    "monthly_from": 49550.0,
+    "monthly_to": 49949.95,
+    "G": 17.7
+  },
+  {
+    "monthly_from": 49950.0,
+    "monthly_to": 50149.95,
+    "G": 17.71
+  },
+  {
+    "monthly_from": 50150.0,
+    "monthly_to": 50349.95,
+    "G": 17.72
+  },
+  {
+    "monthly_from": 50350.0,
+    "monthly_to": 50549.95,
+    "G": 17.73
+  },
+  {
+    "monthly_from": 50550.0,
+    "monthly_to": 50749.95,
+    "G": 17.74
+  },
+  {
+    "monthly_from": 50750.0,
+    "monthly_to": 51149.95,
+    "G": 17.75
+  },
+  {
+    "monthly_from": 51150.0,
+    "monthly_to": 51349.95,
+    "G": 17.76
+  },
+  {
+    "monthly_from": 51350.0,
+    "monthly_to": 51549.95,
+    "G": 17.77
+  },
+  {
+    "monthly_from": 51550.0,
+    "monthly_to": 51749.95,
+    "G": 17.78
+  },
+  {
+    "monthly_from": 51750.0,
+    "monthly_to": 52149.95,
+    "G": 17.79
+  },
+  {
+    "monthly_from": 52150.0,
+    "monthly_to": 52349.95,
+    "G": 17.8
+  },
+  {
+    "monthly_from": 52350.0,
+    "monthly_to": 52549.95,
+    "G": 17.81
+  },
+  {
+    "monthly_from": 52550.0,
+    "monthly_to": 52749.95,
+    "G": 17.82
+  },
+  {
+    "monthly_from": 52750.0,
+    "monthly_to": 53149.95,
+    "G": 17.83
+  },
+  {
+    "monthly_from": 53150.0,
+    "monthly_to": 53349.95,
+    "G": 17.84
+  },
+  {
+    "monthly_from": 53350.0,
+    "monthly_to": 53549.95,
+    "G": 17.85
+  },
+  {
+    "monthly_from": 53550.0,
+    "monthly_to": 53949.95,
+    "G": 17.86
+  },
+  {
+    "monthly_from": 53950.0,
+    "monthly_to": 54149.95,
+    "G": 17.87
+  },
+  {
+    "monthly_from": 54150.0,
+    "monthly_to": 54349.95,
+    "G": 17.88
+  },
+  {
+    "monthly_from": 54350.0,
+    "monthly_to": 54749.95,
+    "G": 17.89
+  },
+  {
+    "monthly_from": 54750.0,
+    "monthly_to": 54949.95,
+    "G": 17.9
+  },
+  {
+    "monthly_from": 54950.0,
+    "monthly_to": 55349.95,
+    "G": 17.91
+  },
+  {
+    "monthly_from": 55350.0,
+    "monthly_to": 55549.95,
+    "G": 17.92
+  },
+  {
+    "monthly_from": 55550.0,
+    "monthly_to": 55949.95,
+    "G": 17.93
+  },
+  {
+    "monthly_from": 55950.0,
+    "monthly_to": 56149.95,
+    "G": 17.94
+  },
+  {
+    "monthly_from": 56150.0,
+    "monthly_to": 56549.95,
+    "G": 17.95
+  },
+  {
+    "monthly_from": 56550.0,
+    "monthly_to": 56749.95,
+    "G": 17.96
+  },
+  {
+    "monthly_from": 56750.0,
+    "monthly_to": 57149.95,
+    "G": 17.97
+  },
+  {
+    "monthly_from": 57150.0,
+    "monthly_to": 57349.95,
+    "G": 17.98
+  },
+  {
+    "monthly_from": 57350.0,
+    "monthly_to": 57749.95,
+    "G": 17.99
+  },
+  {
+    "monthly_from": 57750.0,
+    "monthly_to": 57949.95,
+    "G": 18.0
+  },
+  {
+    "monthly_from": 57950.0,
+    "monthly_to": 58349.95,
+    "G": 18.01
+  },
+  {
+    "monthly_from": 58350.0,
+    "monthly_to": 58549.95,
+    "G": 18.02
+  },
+  {
+    "monthly_from": 58550.0,
+    "monthly_to": 58949.95,
+    "G": 18.03
+  },
+  {
+    "monthly_from": 58950.0,
+    "monthly_to": 59349.95,
+    "G": 18.04
+  },
+  {
+    "monthly_from": 59350.0,
+    "monthly_to": 59549.95,
+    "G": 18.05
+  },
+  {
+    "monthly_from": 59550.0,
+    "monthly_to": 59949.95,
+    "G": 18.06
+  },
+  {
+    "monthly_from": 59950.0,
+    "monthly_to": 60349.95,
+    "G": 18.07
+  },
+  {
+    "monthly_from": 60350.0,
+    "monthly_to": 60549.95,
+    "G": 18.08
+  },
+  {
+    "monthly_from": 60550.0,
+    "monthly_to": 60949.95,
+    "G": 18.09
+  },
+  {
+    "monthly_from": 60950.0,
+    "monthly_to": 61349.95,
+    "G": 18.1
+  },
+  {
+    "monthly_from": 61350.0,
+    "monthly_to": 61749.95,
+    "G": 18.11
+  },
+  {
+    "monthly_from": 61750.0,
+    "monthly_to": 61949.95,
+    "G": 18.12
+  },
+  {
+    "monthly_from": 61950.0,
+    "monthly_to": 62349.95,
+    "G": 18.13
+  },
+  {
+    "monthly_from": 62350.0,
+    "monthly_to": 62749.95,
+    "G": 18.14
+  },
+  {
+    "monthly_from": 62750.0,
+    "monthly_to": 63149.95,
+    "G": 18.15
+  },
+  {
+    "monthly_from": 63150.0,
+    "monthly_to": 63549.95,
+    "G": 18.16
+  },
+  {
+    "monthly_from": 63550.0,
+    "monthly_to": 63949.95,
+    "G": 18.17
+  },
+  {
+    "monthly_from": 63950.0,
+    "monthly_to": 64149.95,
+    "G": 18.18
+  },
+  {
+    "monthly_from": 64150.0,
+    "monthly_to": 64549.95,
+    "G": 18.19
+  },
+  {
+    "monthly_from": 64550.0,
+    "monthly_to": 65149.95,
+    "G": 18.2
+  },
+  {
+    "monthly_from": 65150.0,
+    "monthly_to": 67549.95,
+    "G": 18.21
+  },
+  {
+    "monthly_from": 67550.0,
+    "monthly_to": 69949.95,
+    "G": 18.22
+  },
+  {
+    "monthly_from": 69950.0,
+    "monthly_to": 72549.95,
+    "G": 18.23
+  },
+  {
+    "monthly_from": 72550.0,
+    "monthly_to": 75349.95,
+    "G": 18.24
+  },
+  {
+    "monthly_from": 75350.0,
+    "monthly_to": 78549.95,
+    "G": 18.25
+  },
+  {
+    "monthly_from": 78550.0,
+    "monthly_to": 81749.95,
+    "G": 18.26
+  },
+  {
+    "monthly_from": 81750.0,
+    "monthly_to": 85349.95,
+    "G": 18.27
+  },
+  {
+    "monthly_from": 85350.0,
+    "monthly_to": 89349.95,
+    "G": 18.28
+  },
+  {
+    "monthly_from": 89350.0,
+    "monthly_to": 93749.95,
+    "G": 18.29
+  },
+  {
+    "monthly_from": 93750.0,
+    "monthly_to": 98549.95,
+    "G": 18.3
+  },
+  {
+    "monthly_from": 98550.0,
+    "monthly_to": 103949.95,
+    "G": 18.31
+  },
+  {
+    "monthly_from": 103950.0,
+    "monthly_to": 109949.95,
+    "G": 18.32
+  },
+  {
+    "monthly_from": 109950.0,
+    "monthly_to": 116549.95,
+    "G": 18.33
+  },
+  {
+    "monthly_from": 116550.0,
+    "monthly_to": 123949.95,
+    "G": 18.34
+  },
+  {
+    "monthly_from": 123950.0,
+    "monthly_to": 132549.95,
+    "G": 18.35
+  },
+  {
+    "monthly_from": 132550.0,
+    "monthly_to": 142349.95,
+    "G": 18.36
+  },
+  {
+    "monthly_from": 142350.0,
+    "monthly_to": 153749.95,
+    "G": 18.37
+  },
+  {
+    "monthly_from": 153750.0,
+    "monthly_to": 167149.95,
+    "G": 18.38
+  },
+  {
+    "monthly_from": 167150.0,
+    "monthly_to": 183149.95,
+    "G": 18.39
+  },
+  {
+    "monthly_from": 183150.0,
+    "monthly_to": 202349.95,
+    "G": 18.4
+  },
+  {
+    "monthly_from": 202350.0,
+    "monthly_to": 226149.95,
+    "G": 18.41
+  },
+  {
+    "monthly_from": 226150.0,
+    "monthly_to": 256349.95,
+    "G": 18.42
+  },
+  {
+    "monthly_from": 256350.0,
+    "monthly_to": 295749.95,
+    "G": 18.43
+  },
+  {
+    "monthly_from": 295750.0,
+    "monthly_to": 349549.95,
+    "G": 18.44
+  },
+  {
+    "monthly_from": 349550.0,
+    "monthly_to": 427149.95,
+    "G": 18.45
+  },
+  {
+    "monthly_from": 427150.0,
+    "monthly_to": 549349.95,
+    "G": 18.46
+  },
+  {
+    "monthly_from": 549350.0,
+    "monthly_to": 768949.95,
+    "G": 18.47
+  },
+  {
+    "monthly_from": 768950.0,
+    "monthly_to": 1281749.95,
+    "G": 18.48
+  },
+  {
+    "monthly_from": 1281750.0,
+    "monthly_to": 3845749.95,
+    "G": 18.49
+  },
+  {
+    "monthly_from": 3845750.0,
+    "monthly_to": 9999999.0,
+    "G": 18.5
+  }
+]

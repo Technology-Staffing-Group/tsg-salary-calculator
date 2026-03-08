@@ -71,6 +71,10 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
   const [baseFunction, setBaseFunction] = useState(saved?.baseFunction !== false);
   const [dependents, setDependents] = useState<string>(saved?.dependents || '0');
 
+  // Manual IS (Impôt à la source) — CH only
+  const [useManualIS, setUseManualIS] = useState<boolean>(saved?.useManualIS || false);
+  const [manualISAmount, setManualISAmount] = useState<string>(saved?.manualISAmount || '');
+
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showIdentity, setShowIdentity] = useState(saved?.country === 'CH' || false);
 
@@ -117,9 +121,9 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
       marginInputType, targetMarginPct, fixedDailyAmount,
       lfpRate, laaRate,
       disabledExemption, mealBenefits, baseFunction, dependents,
-      alignmentCurrency,
+      alignmentCurrency, useManualIS, manualISAmount,
     }));
-  }, [country, basis, period, amount, occRate, clientDailyRate, marginPercent, workingDays, marginInputType, targetMarginPct, fixedDailyAmount, lfpRate, laaRate, disabledExemption, mealBenefits, baseFunction, dependents, alignmentCurrency]);
+  }, [country, basis, period, amount, occRate, clientDailyRate, marginPercent, workingDays, marginInputType, targetMarginPct, fixedDailyAmount, lfpRate, laaRate, disabledExemption, mealBenefits, baseFunction, dependents, alignmentCurrency, useManualIS, manualISAmount]);
 
   const calculate = useCallback(async () => {
     if (country === 'CH' && !identity.dateOfBirth) {
@@ -367,6 +371,30 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
           )}
         </Card>
 
+        {/* Impôt à la source — CH only */}
+        {country === 'CH' && (
+          <Card title="Impôt à la source (IS)">
+            <Toggle
+              label="Enter IS amount manually"
+              checked={useManualIS}
+              onChange={(v) => { setUseManualIS(v); if (!v) setManualISAmount(''); }}
+              help="If withholding tax applies to this employee, enter the monthly IS amount. It will be shown as a deduction from net salary."
+            />
+            {useManualIS && (
+              <InputField
+                label="Monthly IS Amount"
+                value={manualISAmount}
+                onChange={setManualISAmount}
+                suffix="CHF"
+                min={0}
+                step={10}
+                placeholder="e.g. 381"
+                help="Monthly withholding tax (impôt à la source). Use the IS (GE) tab to calculate the exact amount."
+              />
+            )}
+          </Card>
+        )}
+
         <div className="flex gap-3">
           <Button onClick={calculate} disabled={loading} className="flex-1">{loading ? 'Calculating...' : 'Calculate'}</Button>
           {result && (
@@ -481,6 +509,24 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
             <ResultRow label="Gross Salary (Yearly)" value="" highlight><span className="text-sm font-mono text-tsg-blue-700">{av(result.grossSalaryYearly)}</span></ResultRow>
             <ResultRow label="Net Salary (Monthly)" value=""><span className="text-sm font-mono text-gray-800">{av(result.netSalaryMonthly)}</span></ResultRow>
             <ResultRow label="Net Salary (Yearly)" value="" highlight><span className="text-sm font-mono text-tsg-blue-700">{av(result.netSalaryYearly)}</span></ResultRow>
+            {/* IS deduction — CH manual entry */}
+            {country === 'CH' && useManualIS && Number(manualISAmount) > 0 && (() => {
+              const isMonthly = Number(manualISAmount);
+              const netAfterIS = result.netSalaryMonthly - isMonthly;
+              return (
+                <>
+                  <div className="border-t border-amber-200 mt-2 pt-2">
+                    <ResultRow label="Impôt à la source / month" value={`− ${fmt(isMonthly)} CHF`} />
+                    <ResultRow label="Net after IS (Monthly)" value="" highlight>
+                      <span className="text-sm font-mono font-bold text-amber-700">{av(netAfterIS)}</span>
+                    </ResultRow>
+                    <ResultRow label="Net after IS (Yearly)" value="" highlight>
+                      <span className="text-sm font-mono font-bold text-amber-700">{av(netAfterIS * 12)}</span>
+                    </ResultRow>
+                  </div>
+                </>
+              );
+            })()}
             <ResultRow label="Total Employer Cost (Monthly)" value=""><span className="text-sm font-mono text-gray-800">{av(result.totalEmployerCostMonthly)}</span></ResultRow>
             <ResultRow label="Total Employer Cost (Yearly)" value="" highlight><span className="text-sm font-mono text-tsg-blue-700">{av(result.totalEmployerCostYearly)}</span></ResultRow>
           </Card>
@@ -506,6 +552,7 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
               <p className="text-xs text-blue-700">
                 <strong>Note:</strong> Income tax is <strong>not included</strong> in this calculation.
                 Swiss income tax varies by canton, commune, and church affiliation and must be assessed separately.
+                For employees subject to withholding tax (IS), use the <strong>Impôt à la source (IS)</strong> section above or the <strong>IS (GE)</strong> tab.
               </p>
             </div>
           )}

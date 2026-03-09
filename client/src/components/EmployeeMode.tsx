@@ -34,10 +34,10 @@ function computeAge(dob: string): number | null {
 /** Return the LPP age-band label for UI display. */
 function getLPPBandLabel(age: number): string {
   if (age < 18) return 'Below LPP age (no pension contributions)';
-  if (age <= 24) return '18–24 yrs: 1.2% total (risk & costs only)';
+  if (age <= 24) return '18–24 yrs: 0.3% total (risk & costs only)';
   if (age <= 34) return '25–34 yrs: 8.4% total (7% savings + 1.4% risk)';
-  if (age <= 44) return '35–44 yrs: 11.6% total (10% savings + 1.6% risk)';
-  if (age <= 54) return '45–54 yrs: 16.9% total (15% savings + 1.9% risk)';
+  if (age <= 44) return '35–44 yrs: 11.4% total (9.8% savings + 1.6% risk)';
+  if (age <= 54) return '45–54 yrs: 17.4% total (15.5% savings + 1.9% risk)';
   if (age <= 65) return '55–65 yrs: 20.4% total (18% savings + 2.4% risk)';
   return 'Above LPP age (no pension contributions)';
 }

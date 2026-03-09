@@ -34,10 +34,10 @@ const LPP_PLAN_CEILING_YEARLY = 300000;
 const LPP_COORDINATION_DEDUCTION_YEARLY = 26460;
 
 const LPP_AGE_BANDS = [
-  { minAge: 18, maxAge: 24, totalRate: 0.012, label: '18–24 yrs: 1.2%' },
+  { minAge: 18, maxAge: 24, totalRate: 0.003, label: '18–24 yrs: 0.3%' },
   { minAge: 25, maxAge: 34, totalRate: 0.084, label: '25–34 yrs: 8.4%' },
-  { minAge: 35, maxAge: 44, totalRate: 0.116, label: '35–44 yrs: 11.6%' },
-  { minAge: 45, maxAge: 54, totalRate: 0.169, label: '45–54 yrs: 16.9%' },
+  { minAge: 35, maxAge: 44, totalRate: 0.114, label: '35–44 yrs: 11.4%' },
+  { minAge: 45, maxAge: 54, totalRate: 0.174, label: '45–54 yrs: 17.4%' },
   { minAge: 55, maxAge: 65, totalRate: 0.204, label: '55–65 yrs: 20.4%' },
 ];
 

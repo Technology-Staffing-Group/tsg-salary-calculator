@@ -27,7 +27,7 @@ function loadIdentity(): EmployeeIdentity {
 }
 
 export default function App() {
-  const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem('tsg_auth') === '1');
+  const [authenticated, setAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<AppMode>('employee');
   const [fxData, setFxData] = useState<FXData | null>(null);
   const [fxLoading, setFxLoading] = useState(false);
@@ -113,7 +113,7 @@ export default function App() {
                 )}
               </div>
               <button
-                onClick={() => { sessionStorage.removeItem('tsg_auth'); setAuthenticated(false); }}
+                onClick={() => setAuthenticated(false)}
                 className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
                 title="Sign out"
               >

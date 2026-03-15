@@ -21,7 +21,6 @@ export default function LoginScreen({ onLogin }: Props) {
     // Simulate a brief auth check
     setTimeout(() => {
       if (username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD) {
-        sessionStorage.setItem('tsg_auth', '1');
         onLogin();
       } else {
         setError('Invalid username or password.');

@@ -245,9 +245,10 @@ export function exportEmployeePDF(
     const metricsBody: string[][] = [
       ['Daily Cost Rate', fmtDual(inputs.metrics.dailyCostRate, cur, aligned)],
     ];
-    if (inputs.metrics.dailyPlacementRate !== undefined) {
+    const hasPlacementRate = inputs.metrics.dailyPlacementRate !== undefined;
+    if (hasPlacementRate) {
       const label = inputs.marginInputType === 'FIXED_DAILY' ? 'Daily Placement Rate (Fixed)' : 'Daily Placement Rate';
-      metricsBody.push([label, fmtDual(inputs.metrics.dailyPlacementRate, cur, aligned)]);
+      metricsBody.push([label, fmtDual(inputs.metrics.dailyPlacementRate!, cur, aligned)]);
     }
     if (inputs.metrics.dailyRevenue !== undefined) {
       metricsBody.push(['Daily Revenue', fmtDual(inputs.metrics.dailyRevenue, cur, aligned)]);
@@ -267,6 +268,11 @@ export function exportEmployeePDF(
       headStyles: { fillColor: [46, 134, 193] },
       styles: { fontSize: 9 },
       margin: { left: 14, right: 14 },
+      didParseCell: (data) => {
+        if (data.section === 'body' && (data.row.index === 0 || (hasPlacementRate && data.row.index === 1))) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
     });
 
     y = (doc as any).lastAutoTable.finalY + 8;

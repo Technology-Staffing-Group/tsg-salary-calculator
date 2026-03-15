@@ -78,10 +78,13 @@ export default function App() {
             {/* Logo */}
             <div className="flex items-center gap-3">
               <div className="flex items-center">
-                <svg width="44" height="36" viewBox="0 0 120 100" className="mr-2">
-                  <polygon points="10,50 35,25 60,50 35,75" fill="#D6001C"/>
-                  <polygon points="35,50 60,25 85,50 60,75" fill="#000000"/>
-                  <polygon points="35,50 47,38 60,50 47,62" fill="#D6001C"/>
+                <svg width="44" height="27" viewBox="0 0 200 120" className="mr-2">
+                  {/* Left red diamond */}
+                  <polygon points="0,60 50,10 100,60 50,110" fill="#D6001C"/>
+                  {/* Right red arrow with V-notch */}
+                  <polygon points="70,12 185,12 200,60 185,108 70,108 94,60" fill="#D6001C"/>
+                  {/* Black overlap triangle */}
+                  <polygon points="70,30 94,60 70,90" fill="#000000"/>
                 </svg>
                 <div>
                   <h1 className="text-lg font-bold text-gray-900 leading-tight">

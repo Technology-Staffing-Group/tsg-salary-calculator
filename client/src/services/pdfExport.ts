@@ -10,6 +10,33 @@ import type { EmployeeResult, B2BResult, AllocationResult, PayslipResult, Employ
 const DISCLAIMER = 'This calculator provides estimates based on current tax rules and rates. Results are for planning only and must be validated by a tax professional.';
 
 // ============================================================
+// TSG Logo mark for PDF headers
+// Draws: red diamond + red right-arrow + black overlap triangle
+// Coordinates based on a 200×120 SVG viewBox
+// ============================================================
+function drawTSGLogo(doc: jsPDF, x: number, y: number, w = 14, h = 10) {
+  const sx = w / 200;
+  const sy = h / 120;
+  const px = (v: number) => x + v * sx;
+  const py = (v: number) => y + v * sy;
+
+  // Left red diamond (two triangles)
+  doc.setFillColor(214, 0, 28);
+  doc.triangle(px(0), py(60), px(50), py(10), px(100), py(60), 'F');
+  doc.triangle(px(0), py(60), px(50), py(110), px(100), py(60), 'F');
+
+  // Right red arrow: rectangular body + right tip + two left flanks
+  doc.rect(px(94), py(12), (185 - 94) * sx, (108 - 12) * sy, 'F');
+  doc.triangle(px(185), py(12), px(200), py(60), px(185), py(108), 'F');
+  doc.triangle(px(70), py(12), px(94), py(12), px(94), py(60), 'F');
+  doc.triangle(px(70), py(108), px(94), py(108), px(94), py(60), 'F');
+
+  // Black overlap triangle on top
+  doc.setFillColor(0, 0, 0);
+  doc.triangle(px(70), py(30), px(94), py(60), px(70), py(90), 'F');
+}
+
+// ============================================================
 // Aligned currency options passed to all PDF exports
 // ============================================================
 export interface PDFAlignedOptions {
@@ -50,18 +77,13 @@ function fmtDual(
 }
 
 function addHeader(doc: jsPDF, title: string) {
-  // TSG Logo area
-  doc.setFillColor(214, 0, 28);
-  doc.rect(14, 10, 8, 8, 'F');
-  doc.setFillColor(0, 0, 0);
-  doc.rect(18, 10, 8, 8, 'F');
-  doc.setFillColor(214, 0, 28);
-  doc.triangle(18, 14, 22, 10, 22, 18, 'F');
+  // TSG Logo
+  drawTSGLogo(doc, 14, 9.5, 14, 10);
 
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
-  doc.text('TSG', 30, 17);
+  doc.text('TSG', 31, 17);
 
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
@@ -640,17 +662,12 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
   const doc = new jsPDF();
 
   // --- Payslip Header (custom, not standard addHeader) ---
-  doc.setFillColor(214, 0, 28);
-  doc.rect(14, 10, 8, 8, 'F');
-  doc.setFillColor(0, 0, 0);
-  doc.rect(18, 10, 8, 8, 'F');
-  doc.setFillColor(214, 0, 28);
-  doc.triangle(18, 14, 22, 10, 22, 18, 'F');
+  drawTSGLogo(doc, 14, 9.5, 14, 10);
 
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
-  doc.text(companyName, 30, 16);
+  doc.text(companyName, 31, 16);
 
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');

@@ -34,13 +34,13 @@ export default function LoginScreen({ onLogin }: Props) {
       <div className="w-full max-w-sm">
         {/* Logo / Branding */}
         <div className="flex flex-col items-center mb-8">
-          <svg width="90" height="54" viewBox="0 0 200 120" className="mb-4">
+          <svg width="120" height="71" viewBox="0 0 200 118" className="mb-4">
             {/* Left red diamond */}
-            <polygon points="0,60 50,10 100,60 50,110" fill="#D6001C" />
-            {/* Right red arrow with V-notch */}
-            <polygon points="70,12 185,12 200,60 185,108 70,108 94,60" fill="#D6001C" />
+            <polygon points="0,59 55,4 110,59 55,114" fill="#D6001C" />
+            {/* Right red arrow with V-notch at diamond tip */}
+            <polygon points="70,4 185,4 200,59 185,114 70,114 110,59" fill="#D6001C" />
             {/* Black overlap triangle */}
-            <polygon points="70,30 94,60 70,90" fill="#000000" />
+            <polygon points="70,19 110,59 70,99" fill="#000000" />
           </svg>
           <h1 className="text-2xl font-bold text-gray-900">
             <span className="text-tsg-red">TSG</span> Salary Calculator

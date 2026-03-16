@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="400" height="260">
   <!-- Left red diamond -->
-  <polygon points="0,120 100,20 200,120 100,220" fill="#D6001C"/>
-  <!-- Right red arrow with V-notch -->
-  <polygon points="140,24 370,24 400,120 370,216 140,216 188,120" fill="#D6001C"/>
+  <polygon points="0,118 110,8 220,118 110,228" fill="#D6001C"/>
+  <!-- Right red arrow with V-notch at diamond tip -->
+  <polygon points="140,8 370,8 400,118 370,228 140,228 220,118" fill="#D6001C"/>
   <!-- Black overlap triangle -->
-  <polygon points="140,60 188,120 140,180" fill="#000000"/>
+  <polygon points="140,38 220,118 140,198" fill="#000000"/>
   <!-- TSG text -->
-  <text x="0" y="250" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="90" fill="#000000">TSG</text>
+  <text x="0" y="255" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="90" fill="#000000">TSG</text>
 </svg>

@@ -33,18 +33,6 @@ export default function App() {
   const [fxLoading, setFxLoading] = useState(false);
   const [identity, setIdentity] = useState<EmployeeIdentity>(loadIdentity);
 
-  if (!authenticated) {
-    return <LoginScreen onLogin={() => setAuthenticated(true)} />;
-  }
-
-  // Persist identity
-  useEffect(() => {
-    localStorage.setItem(IDENTITY_STORAGE_KEY, JSON.stringify(identity));
-  }, [identity]);
-
-  // Load FX rates on mount
-  useEffect(() => { loadFXRates(); }, []);
-
   const loadFXRates = async () => {
     setFxLoading(true);
     try {
@@ -69,6 +57,18 @@ export default function App() {
     }
   };
 
+  // Persist identity
+  useEffect(() => {
+    localStorage.setItem(IDENTITY_STORAGE_KEY, JSON.stringify(identity));
+  }, [identity]);
+
+  // Load FX rates on mount
+  useEffect(() => { loadFXRates(); }, []);
+
+  if (!authenticated) {
+    return <LoginScreen onLogin={() => setAuthenticated(true)} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ====== Header ====== */}
@@ -78,13 +78,13 @@ export default function App() {
             {/* Logo */}
             <div className="flex items-center gap-3">
               <div className="flex items-center">
-                <svg width="44" height="27" viewBox="0 0 200 120" className="mr-2">
+                <svg width="44" height="26" viewBox="0 0 200 118" className="mr-2">
                   {/* Left red diamond */}
-                  <polygon points="0,60 50,10 100,60 50,110" fill="#D6001C"/>
-                  {/* Right red arrow with V-notch */}
-                  <polygon points="70,12 185,12 200,60 185,108 70,108 94,60" fill="#D6001C"/>
+                  <polygon points="0,59 55,4 110,59 55,114" fill="#D6001C"/>
+                  {/* Right red arrow with V-notch at diamond tip */}
+                  <polygon points="70,4 185,4 200,59 185,114 70,114 110,59" fill="#D6001C"/>
                   {/* Black overlap triangle */}
-                  <polygon points="70,30 94,60 70,90" fill="#000000"/>
+                  <polygon points="70,19 110,59 70,99" fill="#000000"/>
                 </svg>
                 <div>
                   <h1 className="text-lg font-bold text-gray-900 leading-tight">

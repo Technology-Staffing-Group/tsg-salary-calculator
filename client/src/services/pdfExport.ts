@@ -11,29 +11,28 @@ const DISCLAIMER = 'This calculator provides estimates based on current tax rule
 
 // ============================================================
 // TSG Logo mark for PDF headers
-// Draws: red diamond + red right-arrow + black overlap triangle
-// Coordinates based on a 200×120 SVG viewBox
+// Coordinates match the SVG viewBox "0 0 200 118"
 // ============================================================
-function drawTSGLogo(doc: jsPDF, x: number, y: number, w = 14, h = 10) {
+function drawTSGLogo(doc: jsPDF, x: number, y: number, w = 14, h = 8.3) {
   const sx = w / 200;
-  const sy = h / 120;
+  const sy = h / 118;
   const px = (v: number) => x + v * sx;
   const py = (v: number) => y + v * sy;
 
   // Left red diamond (two triangles)
   doc.setFillColor(214, 0, 28);
-  doc.triangle(px(0), py(60), px(50), py(10), px(100), py(60), 'F');
-  doc.triangle(px(0), py(60), px(50), py(110), px(100), py(60), 'F');
+  doc.triangle(px(0), py(59), px(55), py(4), px(110), py(59), 'F');
+  doc.triangle(px(0), py(59), px(55), py(114), px(110), py(59), 'F');
 
-  // Right red arrow: rectangular body + right tip + two left flanks
-  doc.rect(px(94), py(12), (185 - 94) * sx, (108 - 12) * sy, 'F');
-  doc.triangle(px(185), py(12), px(200), py(60), px(185), py(108), 'F');
-  doc.triangle(px(70), py(12), px(94), py(12), px(94), py(60), 'F');
-  doc.triangle(px(70), py(108), px(94), py(108), px(94), py(60), 'F');
+  // Right red arrow: notch coincides with diamond tip at (110,59)
+  doc.rect(px(110), py(4), (185 - 110) * sx, (114 - 4) * sy, 'F');
+  doc.triangle(px(185), py(4), px(200), py(59), px(185), py(114), 'F');
+  doc.triangle(px(70), py(4), px(110), py(4), px(110), py(59), 'F');
+  doc.triangle(px(70), py(114), px(110), py(114), px(110), py(59), 'F');
 
   // Black overlap triangle on top
   doc.setFillColor(0, 0, 0);
-  doc.triangle(px(70), py(30), px(94), py(60), px(70), py(90), 'F');
+  doc.triangle(px(70), py(19), px(110), py(59), px(70), py(99), 'F');
 }
 
 // ============================================================

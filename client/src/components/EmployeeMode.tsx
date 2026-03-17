@@ -5,6 +5,7 @@ import {
 } from './UIComponents';
 import EmployeeIdentityFields from './EmployeeIdentityFields';
 import AlignedCurrencyPanel, { AlignedValue } from './AlignedCurrencyPanel';
+import PayslipMode from './PayslipMode';
 import { api } from '../services/api';
 import { exportEmployeePDF, PDFAlignedOptions } from '../services/pdfExport';
 import type {
@@ -308,6 +309,7 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
     }));
 
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* ====== LEFT ====== */}
       <div className="space-y-4">
@@ -478,14 +480,11 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
         {/* Impôt à la source — CH only */}
         {country === 'CH' && (
           <Card title="Impôt à la source (IS)">
-            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5 mb-3">
-              Applies to: <strong>Permis B or lower</strong> · <strong>No Swiss tax domicile</strong>
-            </p>
             <Toggle
-              label="Enter IS amount manually"
+              label="Employee is subject to IS (Impôt à la source)"
               checked={useManualIS}
               onChange={(v) => { setUseManualIS(v); if (!v) setManualISAmount(''); }}
-              help="If withholding tax applies to this employee, enter the monthly IS amount. It will be shown as a deduction from net salary."
+              help="Applies to employees with Permis B or lower, or without Swiss tax domicile."
             />
             {useManualIS && (
               <InputField
@@ -496,7 +495,7 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
                 min={0}
                 step={10}
                 placeholder="e.g. 381"
-                help="Monthly withholding tax (impôt à la source). Use the IS (GE) tab to calculate the exact amount."
+                help="Monthly withholding tax (impôt à la source). Use the IS (GE/VD) tab to calculate the exact amount."
               />
             )}
           </Card>
@@ -733,5 +732,18 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
         )}
       </div>
     </div>
+
+    {/* ====== Payslip Generator — Switzerland only ====== */}
+    {country === 'CH' && (
+      <div className="mt-6">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Payslip Generator</span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+        <PayslipMode fxData={fxData} identity={identity} onIdentityChange={onIdentityChange} />
+      </div>
+    )}
+    </>
   );
 }

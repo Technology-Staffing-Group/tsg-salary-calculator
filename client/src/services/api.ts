@@ -4,20 +4,8 @@
 
 const API_BASE = '/api';
 
-function getToken(): string | null {
-  try {
-    const stored = localStorage.getItem('tsg_session');
-    if (!stored) return null;
-    return JSON.parse(stored).token ?? null;
-  } catch { return null; }
-}
-
-async function apiCall<T>(endpoint: string, options?: RequestInit, withAuth = false): Promise<T> {
+async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (withAuth) {
-    const token = getToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-  }
   const res = await fetch(`${API_BASE}${endpoint}`, { headers, ...options });
   let data: any;
   try {
@@ -57,49 +45,33 @@ export const api = {
   calculateWithholdingVD: (input: any) =>
     apiCall('/withholding/vaud/simple', { method: 'POST', body: JSON.stringify(input) }),
 
-  // ---- Auth ----
-  login: (username: string, password: string) =>
-    apiCall<{ token: string; user: any }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    }),
-
-  logout: () =>
-    apiCall('/auth/logout', { method: 'POST' }, true),
-
-  changePassword: (currentPassword: string, newPassword: string) =>
-    apiCall('/auth/change-password', {
-      method: 'POST',
-      body: JSON.stringify({ currentPassword, newPassword }),
-    }, true),
-
   // ---- Activity log ----
   logActivity: (action: string, detail?: string) =>
     apiCall('/activity/log', {
       method: 'POST',
       body: JSON.stringify({ action, detail }),
-    }, true).catch(() => { /* silent — don't break the app if logging fails */ }),
+    }).catch(() => { /* silent — don't break the app if logging fails */ }),
 
   // ---- Admin ----
-  getUsers: () => apiCall<any[]>('/admin/users', undefined, true),
+  getUsers: () => apiCall<any[]>('/admin/users'),
 
   createUser: (username: string, full_name: string, is_admin: boolean) =>
     apiCall<{ user: any; tempPassword: string }>('/admin/users', {
       method: 'POST',
       body: JSON.stringify({ username, full_name, is_admin }),
-    }, true),
+    }),
 
   updateUser: (id: number, updates: { full_name?: string; is_admin?: boolean }) =>
     apiCall<any>(`/admin/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(updates),
-    }, true),
+    }),
 
   resetUserPassword: (id: number) =>
-    apiCall<{ tempPassword: string }>(`/admin/users/${id}/reset-password`, { method: 'POST' }, true),
+    apiCall<{ tempPassword: string }>(`/admin/users/${id}/reset-password`, { method: 'POST' }),
 
   deleteUser: (id: number) =>
-    apiCall(`/admin/users/${id}`, { method: 'DELETE' }, true),
+    apiCall(`/admin/users/${id}`, { method: 'DELETE' }),
 
-  getActivityLog: () => apiCall<any[]>('/admin/logs', undefined, true),
+  getActivityLog: () => apiCall<any[]>('/admin/logs'),
 };

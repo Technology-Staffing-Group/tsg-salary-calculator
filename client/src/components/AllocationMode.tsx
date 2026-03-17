@@ -29,9 +29,9 @@ const SAMPLE_DATA = {
   ],
 };
 
-interface Props { fxData: FXData | null; }
+interface Props { fxData: FXData | null; currentUser?: { full_name: string; token: string } | null; }
 
-export default function AllocationMode({ fxData }: Props) {
+export default function AllocationMode({ fxData, currentUser }: Props) {
   const saved = loadSaved();
   const [salary100, setSalary100] = useState<string>(saved?.salary100 || '160000');
   const [engagementPercent, setEngagementPercent] = useState<string>(saved?.engagementPercent || '80');
@@ -257,12 +257,12 @@ export default function AllocationMode({ fxData }: Props) {
             Load Sample
           </Button>
           {result && (
-            <Button variant="outline" onClick={() => exportAllocationPDF(result, {
+            <Button variant="outline" onClick={() => { exportAllocationPDF(result, {
               salary100: Number(salary100),
               engagementPercent: Number(engagementPercent),
               employerMultiplier: Number(employerMultiplier),
               minDailyMargin: Number(minDailyMargin || 120),
-            }, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined)}>
+            }, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); api.logActivity('PDF_EXPORT', `Allocation ${currency}`); }}>
               Download PDF
             </Button>
           )}

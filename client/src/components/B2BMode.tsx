@@ -11,9 +11,9 @@ function loadSaved(): any {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; }
 }
 
-interface Props { fxData: FXData | null; identity: EmployeeIdentity; onIdentityChange: (id: EmployeeIdentity) => void; }
+interface Props { fxData: FXData | null; identity: EmployeeIdentity; onIdentityChange: (id: EmployeeIdentity) => void; currentUser?: { full_name: string; token: string } | null; }
 
-export default function B2BMode({ fxData, identity, onIdentityChange }: Props) {
+export default function B2BMode({ fxData, identity, onIdentityChange, currentUser }: Props) {
   const saved = loadSaved();
   const [costRate, setCostRate] = useState<string>(saved?.costRate || '800');
   const [rateType, setRateType] = useState<RateType>(saved?.rateType || 'DAILY');
@@ -275,7 +275,7 @@ export default function B2BMode({ fxData, identity, onIdentityChange }: Props) {
             {loading ? 'Calculating...' : 'Calculate'}
           </Button>
           {result && (
-            <Button variant="outline" onClick={() => exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined)}>
+            <Button variant="outline" onClick={() => { exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); api.logActivity('PDF_EXPORT', `B2B ${currency}`); }}>
               Download PDF
             </Button>
           )}

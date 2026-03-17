@@ -9,7 +9,17 @@ export type PensionPlanMode = 'MANDATORY_BVG' | 'SUPER_OBLIGATORY'; // Legacy â€
 // LPP is now computed automatically from employee age bands
 export type PricingMode = 'TARGET_MARGIN' | 'CLIENT_RATE' | 'CLIENT_BUDGET';
 export type RateType = 'DAILY' | 'HOURLY';
-export type AppMode = 'employee' | 'b2b' | 'allocation';
+export type AppMode = 'employee' | 'b2b' | 'allocation' | 'admin';
+
+// --- Authenticated user (returned from login) ---
+export interface CurrentUser {
+  id: number;
+  username: string;
+  full_name: string;
+  is_admin: boolean;
+  must_change_password: boolean;
+  token: string;
+}
 
 // --- Margin Input Type for Employee Mode ---
 // (Legacy - now only used for GROSS/NET modes)

@@ -6,6 +6,10 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import apiRoutes from './routes/api';
+import authRoutes from './routes/auth';
+import adminRoutes from './routes/admin';
+import activityRoutes from './routes/activity';
+import './services/database'; // initialise DB + seed admin on first run
 
 const app = express();
 
@@ -15,6 +19,9 @@ app.use(express.json());
 
 // API routes
 app.use('/api', apiRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/activity', activityRoutes);
 
 // Static file serving and SPA fallback — only when running standalone (not on Vercel)
 // On Vercel, static files are served from outputDirectory and only /api/* hits this function

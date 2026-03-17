@@ -2,7 +2,7 @@
 // TSG Salary & Cost Calculator - Express Server
 // ============================================================
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import apiRoutes from './routes/api';
@@ -16,6 +16,14 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Handle malformed JSON bodies
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ success: false, error: 'Invalid JSON in request body.' });
+  }
+  return res.status(500).json({ success: false, error: err.message || 'Internal server error.' });
+});
 
 // API routes
 app.use('/api', apiRoutes);

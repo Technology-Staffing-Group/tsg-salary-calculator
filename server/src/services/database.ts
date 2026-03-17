@@ -8,7 +8,10 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 
-const DATA_DIR = path.join(__dirname, '../../../data');
+// On Vercel, only /tmp is writable; elsewhere use the repo data/ directory
+const DATA_DIR = process.env.VERCEL
+  ? '/tmp/tsg-data'
+  : path.join(__dirname, '../../../data');
 const DB_PATH = path.join(DATA_DIR, 'users.db');
 
 if (!fs.existsSync(DATA_DIR)) {

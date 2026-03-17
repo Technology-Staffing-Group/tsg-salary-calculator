@@ -428,7 +428,7 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
               alignmentCurrency: showAligned ? alignmentCurrency : undefined,
               rates: showAligned ? rates : undefined,
               generatedBy: currentUser?.full_name,
-            }); api.logActivity('PDF_EXPORT', 'Payslip CH'); }}>
+            }); }}>
               Download Payslip PDF
             </Button>
           )}

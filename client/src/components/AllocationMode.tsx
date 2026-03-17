@@ -262,7 +262,7 @@ export default function AllocationMode({ fxData, currentUser }: Props) {
               engagementPercent: Number(engagementPercent),
               employerMultiplier: Number(employerMultiplier),
               minDailyMargin: Number(minDailyMargin || 120),
-            }, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); api.logActivity('PDF_EXPORT', `Allocation ${currency}`); }}>
+            }, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); }}>
               Download PDF
             </Button>
           )}

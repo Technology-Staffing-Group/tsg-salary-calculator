@@ -6,6 +6,7 @@ import {
 import EmployeeIdentityFields from './EmployeeIdentityFields';
 import AlignedCurrencyPanel, { AlignedValue } from './AlignedCurrencyPanel';
 import { exportPayslipPDF } from '../services/pdfExport';
+import { api } from '../services/api';
 import type { FXData, EmployeeIdentity, PayslipResult, PayslipDeductionLine } from '../types';
 
 const STORAGE_KEY = 'tsg_payslip_inputs';
@@ -102,9 +103,10 @@ interface Props {
   fxData: FXData | null;
   identity: EmployeeIdentity;
   onIdentityChange: (id: EmployeeIdentity) => void;
+  currentUser?: { full_name: string; token: string } | null;
 }
 
-export default function PayslipMode({ fxData, identity, onIdentityChange }: Props) {
+export default function PayslipMode({ fxData, identity, onIdentityChange, currentUser }: Props) {
   const saved = loadSaved();
 
   const [grossMonthlySalary, setGrossMonthlySalary] = useState<string>(saved?.grossMonthlySalary || '10000');
@@ -421,11 +423,12 @@ export default function PayslipMode({ fxData, identity, onIdentityChange }: Prop
 
         <div className="flex gap-3">
           {result && (
-            <Button variant="outline" onClick={() => exportPayslipPDF(result, {
+            <Button variant="outline" onClick={() => { exportPayslipPDF(result, {
               companyName, payPeriod: formatPeriod(payPeriod), identity,
               alignmentCurrency: showAligned ? alignmentCurrency : undefined,
               rates: showAligned ? rates : undefined,
-            })}>
+              generatedBy: currentUser?.full_name,
+            }); api.logActivity('PDF_EXPORT', 'Payslip CH'); }}>
               Download Payslip PDF
             </Button>
           )}

@@ -44,9 +44,9 @@ function getLPPBandLabel(age: number): string {
   return 'Above LPP age (no pension contributions)';
 }
 
-interface Props { fxData: FXData | null; identity: EmployeeIdentity; onIdentityChange: (id: EmployeeIdentity) => void; }
+interface Props { fxData: FXData | null; identity: EmployeeIdentity; onIdentityChange: (id: EmployeeIdentity) => void; currentUser?: { full_name: string; token: string } | null; }
 
-export default function EmployeeMode({ fxData, identity, onIdentityChange }: Props) {
+export default function EmployeeMode({ fxData, identity, onIdentityChange, currentUser }: Props) {
   const saved = loadSaved();
   const [country, setCountry] = useState<CountryCode>(saved?.country || 'CH');
   const [basis, setBasis] = useState<CalculationBasis>(saved?.basis || 'GROSS');
@@ -514,12 +514,12 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
         <div className="flex gap-3">
           <Button onClick={calculate} disabled={loading} className="flex-1">{loading ? 'Calculating...' : 'Calculate'}</Button>
           {result && (
-            <Button variant="outline" onClick={() => exportEmployeePDF(result, {
+            <Button variant="outline" onClick={() => { exportEmployeePDF(result, {
               country, calculationBasis: basis, period, amount: Number(amount),
               occupationRate: Number(occRate), marginInputType, targetMarginPct: Number(targetMarginPct),
               fixedDailyAmount: Number(fixedDailyAmount), metrics,
               clientDailyRate: Number(clientDailyRate), marginPercent: Number(marginPercent), workingDays: Number(workingDays),
-            }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined)}>
+            }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); api.logActivity('PDF_EXPORT', `Employee ${country}`); }}>
               Download PDF
             </Button>
           )}

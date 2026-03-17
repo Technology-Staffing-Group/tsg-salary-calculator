@@ -54,6 +54,17 @@ interface InputFieldProps {
 }
 
 export function InputField({ label, value, onChange, type = 'number', help, suffix, min, max, step, disabled, placeholder }: InputFieldProps) {
+  const showSpinners = type === 'number' && !disabled;
+
+  const handleStep = (dir: 1 | -1) => {
+    const current = parseFloat(String(value)) || 0;
+    const s = step ?? 1;
+    let next = Math.round((current + dir * s) * 1e6) / 1e6;
+    if (min !== undefined && next < min) next = min;
+    if (max !== undefined && next > max) next = max;
+    onChange(String(next));
+  };
+
   return (
     <div className="mb-3">
       <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -61,6 +72,18 @@ export function InputField({ label, value, onChange, type = 'number', help, suff
         {help && <HelpTip text={help} />}
       </label>
       <div className="relative">
+        {showSpinners && (
+          <div className="absolute left-0 inset-y-0 flex flex-col z-10" style={{ width: 22 }}>
+            <button
+              type="button" tabIndex={-1} onClick={() => handleStep(1)}
+              className="flex-1 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-tl-md border-r border-gray-300 text-[9px] leading-none"
+            >▲</button>
+            <button
+              type="button" tabIndex={-1} onClick={() => handleStep(-1)}
+              className="flex-1 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-bl-md border-r border-t border-gray-300 text-[9px] leading-none"
+            >▼</button>
+          </div>
+        )}
         <input
           type={type}
           value={value}
@@ -70,7 +93,7 @@ export function InputField({ label, value, onChange, type = 'number', help, suff
           step={step}
           disabled={disabled}
           placeholder={placeholder}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tsg-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+          className={`w-full py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tsg-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${showSpinners ? 'pl-7' : 'pl-3'} ${suffix ? 'pr-10' : 'pr-3'}`}
         />
         {suffix && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">

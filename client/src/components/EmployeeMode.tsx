@@ -485,6 +485,11 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
         {/* Impôt à la source — CH only */}
         {country === 'CH' && (
           <Card title="Impôt à la source (IS)">
+            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800 leading-relaxed">
+              <strong>Not subject to IS:</strong> Swiss citizens and residents with a <strong>Permit C</strong> living in Switzerland are <em>not</em> subject to withholding tax.
+              <br />
+              For all other permit types (B, L, G, etc.) — use the <strong>IS (GE / VD)</strong> section below to calculate the applicable amount.
+            </div>
             <Toggle
               label="Employee is subject to IS (Impôt à la source)"
               checked={useManualIS}

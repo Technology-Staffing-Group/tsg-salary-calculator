@@ -1,5 +1,4 @@
-import { Router, Response } from 'express';
-import { requireAdmin, AuthRequest } from '../middleware/auth';
+import { Router, Request, Response } from 'express';
 import {
   getAllUsers,
   createUser,
@@ -11,15 +10,14 @@ import {
 } from '../services/database';
 
 const router = Router();
-router.use(requireAdmin);
 
 // GET /api/admin/users
-router.get('/users', (_req: AuthRequest, res: Response) => {
+router.get('/users', (_req: Request, res: Response) => {
   res.json({ success: true, data: getAllUsers() });
 });
 
 // POST /api/admin/users — create user, return temp password
-router.post('/users', (req: AuthRequest, res: Response) => {
+router.post('/users', (req: Request, res: Response) => {
   const { username, full_name, is_admin } = req.body;
   if (!username || !full_name) {
     return res.status(400).json({ success: false, error: 'Username and full name are required.' });
@@ -38,7 +36,7 @@ router.post('/users', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/admin/users/:id — update name / admin flag
-router.put('/users/:id', (req: AuthRequest, res: Response) => {
+router.put('/users/:id', (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const { full_name, is_admin } = req.body;
   const updated = updateUser(id, {
@@ -50,7 +48,7 @@ router.put('/users/:id', (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/admin/users/:id/reset-password — generate new temp password
-router.post('/users/:id/reset-password', (req: AuthRequest, res: Response) => {
+router.post('/users/:id/reset-password', (req: Request, res: Response) => {
   const id = Number(req.params.id);
   if (!getUserById(id)) return res.status(404).json({ success: false, error: 'User not found.' });
   const tempPassword = resetUserPassword(id);
@@ -58,18 +56,15 @@ router.post('/users/:id/reset-password', (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/admin/users/:id
-router.delete('/users/:id', (req: AuthRequest, res: Response) => {
+router.delete('/users/:id', (req: Request, res: Response) => {
   const id = Number(req.params.id);
-  if (req.user?.id === id) {
-    return res.status(400).json({ success: false, error: 'You cannot delete your own account.' });
-  }
   if (!getUserById(id)) return res.status(404).json({ success: false, error: 'User not found.' });
   deleteUser(id);
   return res.json({ success: true, data: null });
 });
 
 // GET /api/admin/logs
-router.get('/logs', (_req: AuthRequest, res: Response) => {
+router.get('/logs', (_req: Request, res: Response) => {
   res.json({ success: true, data: getActivityLog(500) });
 });
 

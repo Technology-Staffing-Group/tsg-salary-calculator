@@ -79,7 +79,6 @@ export default function App() {
                   <h1 className="text-lg font-bold text-gray-900 leading-tight">
                     Salary & Cost Calculator
                   </h1>
-                  <p className="text-[10px] text-gray-400 leading-tight">TSG</p>
                 </div>
               </div>
             </div>

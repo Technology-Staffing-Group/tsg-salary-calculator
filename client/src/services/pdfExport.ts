@@ -60,11 +60,6 @@ function addHeader(doc: jsPDF, title: string) {
   // TSG Logo (square PNG, 14×14mm)
   drawTSGLogo(doc, 14, 8, 14, 14);
 
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text('TSG', 31, 15);
-
   // Title
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
@@ -792,11 +787,6 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
   doc.text(companyName, 31, 15);
-
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text('TSG', 31, 20);
 
   // Period info right-aligned
   doc.setFontSize(12);

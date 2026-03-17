@@ -202,26 +202,75 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
     if (!result || isTotalCostMode) return null;
     const dailyCostRate = result.dailyRate;
 
+    // Effective floor in local currency
+    // CH → CHF, ES → EUR, RO → 120 EUR converted to RON via FX
+    const rawFloor = Number(minDailyMargin) || 120;
+    let effectiveFloor: number;
+    if (country === 'RO') {
+      const eurRate = rates['EUR']; // EUR per 1 RON (base=RON)
+      effectiveFloor = eurRate ? Math.round(rawFloor / eurRate * 100) / 100 : rawFloor;
+    } else {
+      effectiveFloor = rawFloor;
+    }
+    const floorCurrencyLabel = country === 'RO' ? 'EUR' : baseCurrency;
+
     if (marginInputType === 'TARGET_MARGIN') {
       const marginPct = Number(targetMarginPct) / 100;
       if (marginPct >= 1) return { dailyCostRate };
-      const dailyPlacementRate = Math.round(dailyCostRate / (1 - marginPct) * 100) / 100;
-      const dailyRevenue = Math.round((dailyPlacementRate - dailyCostRate) * 100) / 100;
-      return { dailyCostRate, dailyPlacementRate, dailyRevenue, marginPct: Number(targetMarginPct) };
+      const calculatedRate = Math.round(dailyCostRate / (1 - marginPct) * 100) / 100;
+      const calculatedRevenue = Math.round((calculatedRate - dailyCostRate) * 100) / 100;
+
+      if (calculatedRevenue < effectiveFloor) {
+        const dailyPlacementRate = Math.round((dailyCostRate + effectiveFloor) * 100) / 100;
+        const dailyRevenue = Math.round(effectiveFloor * 100) / 100;
+        return {
+          dailyCostRate, dailyPlacementRate, dailyRevenue, marginPct: Number(targetMarginPct),
+          minMarginFloorApplied: true,
+          originalDailyRevenue: calculatedRevenue,
+          originalPlacementRate: calculatedRate,
+          floorValue: effectiveFloor,
+          floorCurrencyLabel,
+          minMarginExplanation:
+            `Minimum daily margin floor of ${fmt(rawFloor)} ${floorCurrencyLabel}` +
+            (country === 'RO' ? ` (= ${fmt(effectiveFloor)} ${baseCurrency})` : '') +
+            ` applied. The calculated margin was ${fmt(calculatedRevenue)} ${baseCurrency}/day ` +
+            `(${Number(targetMarginPct)}% of ${fmt(calculatedRate)} ${baseCurrency}), which is below the floor. ` +
+            `Daily Placement Rate adjusted from ${fmt(calculatedRate)} to ${fmt(dailyPlacementRate)} ${baseCurrency}.`,
+        };
+      }
+      return { dailyCostRate, dailyPlacementRate: calculatedRate, dailyRevenue: calculatedRevenue, marginPct: Number(targetMarginPct) };
     }
 
     if (marginInputType === 'FIXED_DAILY') {
-      const fixedAmt = Number(fixedDailyAmount);
-      if (!fixedAmt || fixedAmt <= 0) return { dailyCostRate };
-      const dailyPlacementRate = fixedAmt;
-      const dailyRevenue = Math.round((dailyPlacementRate - dailyCostRate) * 100) / 100;
-      const marginPct = dailyPlacementRate > 0
-        ? Math.round(dailyRevenue / dailyPlacementRate * 10000) / 100
-        : 0;
-      const markupPct = dailyCostRate > 0
-        ? Math.round(dailyRevenue / dailyCostRate * 10000) / 100
-        : 0;
-      return { dailyCostRate, dailyPlacementRate, dailyRevenue, marginPct, markupPct };
+      const enteredRate = Number(fixedDailyAmount);
+      if (!enteredRate || enteredRate <= 0) return { dailyCostRate };
+      const calculatedRevenue = Math.round((enteredRate - dailyCostRate) * 100) / 100;
+
+      if (calculatedRevenue < effectiveFloor) {
+        const dailyPlacementRate = Math.round((dailyCostRate + effectiveFloor) * 100) / 100;
+        const dailyRevenue = Math.round(effectiveFloor * 100) / 100;
+        const marginPct = dailyPlacementRate > 0 ? Math.round(dailyRevenue / dailyPlacementRate * 10000) / 100 : 0;
+        const markupPct = dailyCostRate > 0 ? Math.round(dailyRevenue / dailyCostRate * 10000) / 100 : 0;
+        return {
+          dailyCostRate, dailyPlacementRate, dailyRevenue, marginPct, markupPct,
+          minMarginFloorApplied: true,
+          originalDailyRevenue: calculatedRevenue,
+          originalPlacementRate: enteredRate,
+          floorValue: effectiveFloor,
+          floorCurrencyLabel,
+          minMarginExplanation:
+            `Minimum daily margin floor of ${fmt(rawFloor)} ${floorCurrencyLabel}` +
+            (country === 'RO' ? ` (= ${fmt(effectiveFloor)} ${baseCurrency})` : '') +
+            ` applied. The entered placement rate (${fmt(enteredRate)} ${baseCurrency}) gives a margin of ` +
+            `${fmt(calculatedRevenue)} ${baseCurrency}/day, which is below the floor. ` +
+            `Daily Placement Rate adjusted from ${fmt(enteredRate)} to ${fmt(dailyPlacementRate)} ${baseCurrency}.`,
+        };
+      }
+
+      const dailyRevenue = calculatedRevenue;
+      const marginPct = enteredRate > 0 ? Math.round(dailyRevenue / enteredRate * 10000) / 100 : 0;
+      const markupPct = dailyCostRate > 0 ? Math.round(dailyRevenue / dailyCostRate * 10000) / 100 : 0;
+      return { dailyCostRate, dailyPlacementRate: enteredRate, dailyRevenue, marginPct, markupPct };
     }
 
     return { dailyCostRate };
@@ -342,6 +391,20 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
               <InputField label="Fixed Daily Placement Rate" value={fixedDailyAmount} onChange={setFixedDailyAmount}
                 suffix={baseCurrency} min={0}
                 help="The daily rate charged to the client." />
+            )}
+            {marginInputType !== 'NONE' && (
+              <InputField
+                label="Min. Daily Margin Floor"
+                value={minDailyMargin}
+                onChange={setMinDailyMargin}
+                suffix={country === 'RO' ? 'EUR' : baseCurrency}
+                min={0}
+                help={
+                  country === 'RO'
+                    ? 'Minimum daily margin in EUR (converted to RON at current FX rate). If the computed margin is below this, the floor is used instead and an explanation is shown. Default: 120 EUR.'
+                    : `Minimum daily margin in ${baseCurrency}. If the computed margin is below this, the floor is used instead and an explanation is shown. Default: 120 ${baseCurrency}.`
+                }
+              />
             )}
           </Card>
         )}
@@ -505,25 +568,59 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange }: Pro
           {/* ===== BUSINESS METRICS (GROSS/NET modes only) ===== */}
           {!isTotalCostMode && metrics && (
             <Card title="Business Metrics">
+              {metrics.minMarginFloorApplied && metrics.minMarginExplanation && (
+                <div className="mb-3 p-3 bg-amber-50 border border-amber-300 rounded-lg flex items-start gap-2">
+                  <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p className="text-xs font-semibold text-amber-800">Minimum Daily Margin Floor Applied</p>
+                    <p className="text-xs text-amber-700 mt-0.5">{metrics.minMarginExplanation}</p>
+                    <div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
+                      <span className="text-amber-600">Calculated placement rate:</span>
+                      <span className="text-right font-mono line-through text-amber-500">{fmt(metrics.originalPlacementRate ?? 0)} {baseCurrency}</span>
+                      <span className="text-amber-600">Calculated margin/day:</span>
+                      <span className="text-right font-mono line-through text-amber-500">{fmt(metrics.originalDailyRevenue ?? 0)} {baseCurrency}</span>
+                      <span className="text-amber-800 font-semibold">Adjusted placement rate:</span>
+                      <span className="text-right font-mono font-bold text-amber-800">{fmt(metrics.dailyPlacementRate ?? 0)} {baseCurrency}</span>
+                      <span className="text-amber-800 font-semibold">Applied margin/day:</span>
+                      <span className="text-right font-mono font-bold text-amber-800">{fmt(metrics.dailyRevenue ?? 0)} {baseCurrency}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <ResultRow label="Daily Cost Rate" value="" highlight
                 help="Total Employer Cost (Yearly) / 220 working days.">
                 <span className="text-sm font-mono text-tsg-blue-700">{av(metrics.dailyCostRate)}</span>
               </ResultRow>
 
               {metrics.dailyPlacementRate !== undefined && (
-                <ResultRow label={marginInputType === 'FIXED_DAILY' ? 'Daily Placement Rate (Fixed)' : 'Daily Placement Rate'} value="" highlight
+                <ResultRow
+                  label={
+                    metrics.minMarginFloorApplied
+                      ? 'Daily Placement Rate (floor applied)'
+                      : marginInputType === 'FIXED_DAILY' ? 'Daily Placement Rate (Fixed)' : 'Daily Placement Rate'
+                  }
+                  value="" highlight
                   help={marginInputType === 'TARGET_MARGIN'
-                    ? 'Daily Cost / (1 - Target Margin %)'
-                    : 'Fixed daily amount entered by the user.'
+                    ? metrics.minMarginFloorApplied
+                      ? `Floor applied: Daily Cost + ${fmt(metrics.floorValue ?? 0)} ${baseCurrency}`
+                      : 'Daily Cost / (1 - Target Margin %)'
+                    : metrics.minMarginFloorApplied
+                      ? `Floor applied: Daily Cost + ${fmt(metrics.floorValue ?? 0)} ${baseCurrency}`
+                      : 'Fixed daily amount entered by the user.'
                   }>
-                  <span className="text-sm font-mono text-tsg-blue-700">{av(metrics.dailyPlacementRate)}</span>
+                  <span className={`text-sm font-mono ${metrics.minMarginFloorApplied ? 'text-amber-700 font-bold' : 'text-tsg-blue-700'}`}>
+                    {av(metrics.dailyPlacementRate)}
+                  </span>
                 </ResultRow>
               )}
 
               {metrics.dailyRevenue !== undefined && (
-                <ResultRow label="Daily Revenue" value=""
+                <ResultRow label="Daily Margin" value=""
                   help="Daily Placement Rate - Daily Cost Rate.">
-                  <span className={`text-sm font-mono font-semibold ${metrics.dailyRevenue >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+                  <span className={`text-sm font-mono font-semibold ${metrics.minMarginFloorApplied ? 'text-amber-700' : metrics.dailyRevenue >= 0 ? 'text-green-700' : 'text-red-600'}`}>
                     {av(metrics.dailyRevenue)}
                   </span>
                 </ResultRow>

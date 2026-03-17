@@ -5,6 +5,6 @@
 const { default: app, ensureDb } = require('../server/dist/index');
 
 module.exports = async (req, res) => {
-  await ensureDb();
+  try { await ensureDb(); } catch (e) { console.warn('DB init skipped:', e.message); }
   return app(req, res);
 };

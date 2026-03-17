@@ -57,45 +57,50 @@ export async function initDb(): Promise<void> {
     return;
   }
 
-  await sql`
-    CREATE TABLE IF NOT EXISTS users (
-      id        SERIAL PRIMARY KEY,
-      username  TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      full_name TEXT NOT NULL,
-      is_admin  INTEGER NOT NULL DEFAULT 0,
-      must_change_password INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS')
-    )
-  `;
-  await sql`
-    CREATE TABLE IF NOT EXISTS sessions (
-      token      TEXT PRIMARY KEY,
-      user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      expires_at TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS')
-    )
-  `;
-  await sql`
-    CREATE TABLE IF NOT EXISTS activity_log (
-      id         SERIAL PRIMARY KEY,
-      user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
-      full_name  TEXT NOT NULL,
-      action     TEXT NOT NULL,
-      detail     TEXT,
-      ip_address TEXT,
-      timestamp  TEXT NOT NULL DEFAULT to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS')
-    )
-  `;
-
-  const rows = await sql`SELECT COUNT(*) AS count FROM users`;
-  if (Number(rows[0].count) === 0) {
-    const hash = bcrypt.hashSync('admin123', 10);
+  try {
     await sql`
-      INSERT INTO users (username, password_hash, full_name, is_admin, must_change_password)
-      VALUES ('admin', ${hash}, 'Administrator', 1, 1)
+      CREATE TABLE IF NOT EXISTS users (
+        id        SERIAL PRIMARY KEY,
+        username  TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        full_name TEXT NOT NULL,
+        is_admin  INTEGER NOT NULL DEFAULT 0,
+        must_change_password INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS')
+      )
     `;
-    console.log('✅ Default admin created — username: admin  password: admin123');
+    await sql`
+      CREATE TABLE IF NOT EXISTS sessions (
+        token      TEXT PRIMARY KEY,
+        user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS')
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS activity_log (
+        id         SERIAL PRIMARY KEY,
+        user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        full_name  TEXT NOT NULL,
+        action     TEXT NOT NULL,
+        detail     TEXT,
+        ip_address TEXT,
+        timestamp  TEXT NOT NULL DEFAULT to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS')
+      )
+    `;
+    const rows = await sql`SELECT COUNT(*) AS count FROM users`;
+    if (Number(rows[0].count) === 0) {
+      const hash = bcrypt.hashSync('admin123', 10);
+      await sql`
+        INSERT INTO users (username, password_hash, full_name, is_admin, must_change_password)
+        VALUES ('admin', ${hash}, 'Administrator', 1, 1)
+      `;
+      console.log('✅ Default admin created — username: admin  password: admin123');
+    }
+  } catch (e: any) {
+    console.warn('⚠️  Neon DB init failed, switching to in-memory store:', e.message);
+    useNeon = false;
+    await initMemory();
   }
 }
 

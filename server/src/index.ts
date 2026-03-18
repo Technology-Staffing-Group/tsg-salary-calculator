@@ -6,10 +6,6 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import apiRoutes from './routes/api';
-import authRoutes from './routes/auth';
-import adminRoutes from './routes/admin';
-import activityRoutes from './routes/activity';
-import { initDb } from './services/database';
 
 const app = express();
 
@@ -19,9 +15,6 @@ app.use(express.json());
 
 // API routes
 app.use('/api', apiRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/activity', activityRoutes);
 
 // Global error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -41,27 +34,11 @@ if (!process.env.VERCEL) {
   });
 
   const PORT = process.env.PORT || 4000;
-  initDb()
-    .then(() => {
-      app.listen(PORT, () => {
-        console.log(`🚀 TSG Calculator API running on http://0.0.0.0:${PORT}`);
-        console.log(`📊 API endpoints available at http://0.0.0.0:${PORT}/api`);
-        console.log(`❤️  Health check: http://0.0.0.0:${PORT}/api/health`);
-      });
-    })
-    .catch(err => {
-      console.error('Failed to initialise database:', err);
-      process.exit(1);
-    });
-}
-
-// On Vercel: initialise DB on first request (lazy, idempotent)
-let dbReady = false;
-export async function ensureDb() {
-  if (!dbReady) {
-    await initDb();
-    dbReady = true;
-  }
+  app.listen(PORT, () => {
+    console.log(`🚀 TSG Calculator API running on http://0.0.0.0:${PORT}`);
+    console.log(`📊 API endpoints available at http://0.0.0.0:${PORT}/api`);
+    console.log(`❤️  Health check: http://0.0.0.0:${PORT}/api/health`);
+  });
 }
 
 export default app;

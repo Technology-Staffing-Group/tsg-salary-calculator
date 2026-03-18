@@ -275,7 +275,7 @@ export default function B2BMode({ fxData, identity, onIdentityChange, currentUse
             {loading ? 'Calculating...' : 'Calculate'}
           </Button>
           {result && (
-            <Button variant="outline" onClick={() => { exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); api.logActivity('PDF_EXPORT', `B2B ${currency}`); }}>
+            <Button variant="outline" onClick={() => { exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); }}>
               Download PDF
             </Button>
           )}

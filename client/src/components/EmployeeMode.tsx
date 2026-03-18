@@ -519,7 +519,7 @@ export default function EmployeeMode({ fxData, identity, onIdentityChange, curre
               occupationRate: Number(occRate), marginInputType, targetMarginPct: Number(targetMarginPct),
               fixedDailyAmount: Number(fixedDailyAmount), metrics,
               clientDailyRate: Number(clientDailyRate), marginPercent: Number(marginPercent), workingDays: Number(workingDays),
-            }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); api.logActivity('PDF_EXPORT', `Employee ${country}`); }}>
+            }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); }}>
               Download PDF
             </Button>
           )}

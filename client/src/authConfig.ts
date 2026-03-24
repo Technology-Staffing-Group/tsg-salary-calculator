@@ -25,7 +25,7 @@ export const msalConfig: Configuration = {
   },
   cache: {
     cacheLocation: 'sessionStorage',  // sessionStorage: cleared when tab closes
-    storeAuthStateInCookie: false,
+    storeAuthStateInCookie: true,     // use cookie to preserve PKCE state across redirect
   },
 };
 

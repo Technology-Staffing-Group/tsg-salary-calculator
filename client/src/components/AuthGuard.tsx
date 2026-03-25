@@ -121,11 +121,11 @@ export default function AuthGuard({ children }: Props) {
     () => !!sessionStorage.getItem(TOKEN_KEY)
   );
 
-  // Listen for storage events (e.g., token cleared from another component)
+  // Listen for 401 responses from api.ts
   useEffect(() => {
-    const onStorage = () => setAuthenticated(!!sessionStorage.getItem(TOKEN_KEY));
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    const onUnauth = () => setAuthenticated(false);
+    window.addEventListener('tsg:unauthenticated', onUnauth);
+    return () => window.removeEventListener('tsg:unauthenticated', onUnauth);
   }, []);
 
   if (!authenticated) {

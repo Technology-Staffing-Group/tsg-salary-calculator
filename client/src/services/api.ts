@@ -12,10 +12,10 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
   const res = await fetch(`${API_BASE}${endpoint}`, { headers, ...options });
 
-  // Session expired or invalid — clear token and reload to show login page
+  // Session expired or invalid — clear token and notify AuthGuard
   if (res.status === 401) {
     sessionStorage.removeItem(TOKEN_KEY);
-    window.location.reload();
+    window.dispatchEvent(new Event('tsg:unauthenticated'));
     throw new Error('Session expired. Please sign in again.');
   }
 

@@ -103,10 +103,9 @@ interface Props {
   fxData: FXData | null;
   identity: EmployeeIdentity;
   onIdentityChange: (id: EmployeeIdentity) => void;
-  currentUser?: { full_name: string; token: string } | null;
 }
 
-export default function PayslipMode({ fxData, identity, onIdentityChange, currentUser }: Props) {
+export default function PayslipMode({ fxData, identity, onIdentityChange }: Props) {
   const saved = loadSaved();
 
   const [grossMonthlySalary, setGrossMonthlySalary] = useState<string>(saved?.grossMonthlySalary || '10000');
@@ -449,7 +448,6 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
               address: address || undefined,
               alignmentCurrency: showAligned ? alignmentCurrency : undefined,
               rates: showAligned ? rates : undefined,
-              generatedBy: currentUser?.full_name,
             }); }}>
               Download Payslip PDF
             </Button>

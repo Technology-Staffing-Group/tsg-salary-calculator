@@ -30,7 +30,7 @@ export default function App() {
 
   const handleSignOut = () => {
     clearAuthToken();
-    window.location.reload();
+    window.dispatchEvent(new Event('tsg:unauthenticated'));
   };
 
   const loadFXRates = async () => {

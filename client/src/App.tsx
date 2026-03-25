@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useMsal } from '@azure/msal-react';
 import EmployeeMode from './components/EmployeeMode';
 import B2BMode from './components/B2BMode';
 import AllocationMode from './components/AllocationMode';
-import AuthGuard from './components/AuthGuard';
+import AuthGuard, { clearAuthToken } from './components/AuthGuard';
 import { api } from './services/api';
 import type { AppMode, FXData, EmployeeIdentity } from './types';
 
@@ -24,16 +23,14 @@ function loadIdentity(): EmployeeIdentity {
 }
 
 export default function App() {
-  const { instance: msalInstance, accounts } = useMsal();
-  const currentAccount = accounts[0];
-
   const [activeTab, setActiveTab] = useState<AppMode>('employee');
   const [fxData, setFxData] = useState<FXData | null>(null);
   const [fxLoading, setFxLoading] = useState(false);
   const [identity, setIdentity] = useState<EmployeeIdentity>(loadIdentity);
 
   const handleSignOut = () => {
-    msalInstance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
+    clearAuthToken();
+    window.location.reload();
   };
 
   const loadFXRates = async () => {
@@ -82,24 +79,17 @@ export default function App() {
                 )}
               </div>
 
-              {/* Signed-in user + sign-out */}
-              {currentAccount && (
-                <div className="flex items-center gap-2">
-                  <span className="hidden sm:block text-xs text-gray-600 max-w-[140px] truncate" title={currentAccount.username}>
-                    {currentAccount.name || currentAccount.username}
-                  </span>
-                  <button
-                    onClick={handleSignOut}
-                    title="Sign out"
-                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-600 transition-colors border border-gray-200 rounded px-2 py-1"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Sign out
-                  </button>
-                </div>
-              )}
+              {/* Sign-out */}
+              <button
+                onClick={handleSignOut}
+                title="Sign out"
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-600 transition-colors border border-gray-200 rounded px-2 py-1"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign out
+              </button>
             </div>
           </div>
         </div>

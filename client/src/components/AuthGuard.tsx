@@ -1,38 +1,55 @@
 // ============================================================
 // AuthGuard — blocks the app until the user is signed in
-// via Microsoft Entra ID (Azure AD)
+// with a username / password checked server-side
 // ============================================================
 
-import React from 'react';
-import {
-  useIsAuthenticated,
-  useMsal,
-  AuthenticatedTemplate,
-  UnauthenticatedTemplate,
-} from '@azure/msal-react';
-import { InteractionStatus } from '@azure/msal-browser';
-import { loginScopes } from '../authConfig';
+import React, { useState, useEffect } from 'react';
 
-function SignInScreen() {
-  const { instance, inProgress } = useMsal();
-  const [error, setError] = React.useState<string | null>(null);
+const TOKEN_KEY = 'tsg_auth_token';
 
-  const handleSignIn = async () => {
+export function getAuthToken(): string | null {
+  return sessionStorage.getItem(TOKEN_KEY);
+}
+
+export function clearAuthToken() {
+  sessionStorage.removeItem(TOKEN_KEY);
+}
+
+function LoginPage({ onSuccess }: { onSuccess: () => void }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
+    setLoading(true);
     try {
-      await instance.loginRedirect({ scopes: loginScopes });
-    } catch (e: any) {
-      setError(e.message || 'Sign-in failed. Please try again.');
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Invalid username or password.');
+      } else {
+        sessionStorage.setItem(TOKEN_KEY, data.token);
+        onSuccess();
+      }
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const isLoading = inProgress !== InteractionStatus.None;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-10 max-w-sm w-full text-center">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-10 max-w-sm w-full">
         {/* TSG branding */}
-        <div className="mb-6">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-tsg-red/10 mb-4">
             <svg className="w-8 h-8 text-tsg-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -40,41 +57,56 @@ function SignInScreen() {
             </svg>
           </div>
           <h1 className="text-xl font-bold text-gray-800">TSG Salary Calculator</h1>
-          <p className="text-sm text-gray-500 mt-1">Sign in with your TSG Microsoft account to continue</p>
+          <p className="text-sm text-gray-500 mt-1">Sign in to continue</p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 text-left">
-            {error}
-          </div>
-        )}
-
-        <button
-          onClick={handleSignIn}
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#0078d4] hover:bg-[#106ebe] disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          {isLoading ? (
-            <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Signing in…
-            </span>
-          ) : (
-            <>
-              {/* Microsoft logo */}
-              <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
-                <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-                <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-                <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-                <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-              </svg>
-              Sign in with Microsoft
-            </>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+              {error}
+            </div>
           )}
-        </button>
 
-        <p className="text-[11px] text-gray-400 mt-5">
-          Access is restricted to authorised TSG accounts.<br />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Username</label>
+            <input
+              type="text"
+              autoComplete="username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-tsg-red/40 focus:border-tsg-red"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-tsg-red/40 focus:border-tsg-red"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 bg-tsg-red hover:bg-tsg-red/90 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Signing in…
+              </span>
+            ) : 'Sign in'}
+          </button>
+        </form>
+
+        <p className="text-[11px] text-gray-400 mt-5 text-center">
+          Access is restricted to authorised TSG users.<br />
           Contact IT if you cannot sign in.
         </p>
       </div>
@@ -85,21 +117,19 @@ function SignInScreen() {
 interface Props { children: React.ReactNode; }
 
 export default function AuthGuard({ children }: Props) {
-  const { inProgress } = useMsal();
-
-  // MSAL is initialising — show a blank screen rather than a flash of the sign-in page
-  if (inProgress === InteractionStatus.Startup || inProgress === InteractionStatus.HandleRedirect) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-2 border-tsg-red border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <AuthenticatedTemplate>{children}</AuthenticatedTemplate>
-      <UnauthenticatedTemplate><SignInScreen /></UnauthenticatedTemplate>
-    </>
+  const [authenticated, setAuthenticated] = useState<boolean>(
+    () => !!sessionStorage.getItem(TOKEN_KEY)
   );
+
+  // Listen for storage events (e.g., token cleared from another component)
+  useEffect(() => {
+    const onStorage = () => setAuthenticated(!!sessionStorage.getItem(TOKEN_KEY));
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  if (!authenticated) {
+    return <LoginPage onSuccess={() => setAuthenticated(true)} />;
+  }
+  return <>{children}</>;
 }

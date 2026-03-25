@@ -313,6 +313,11 @@ export function exportEmployeePDF(
       headStyles: { fillColor: [46, 134, 193] },
       styles: { fontSize: 9 },
       margin: { left: 14, right: 14 },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.row.index === 5) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
     });
 
     y = (doc as any).lastAutoTable.finalY + 8;
@@ -483,7 +488,7 @@ export function exportEmployeePDF(
     doc.text('Note: Income tax is not included. Swiss income tax varies by canton, commune, and church affiliation.', 16, y + 5, { maxWidth: 178 });
   }
 
-  doc.save(`TSG_Employee_${result.country}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`Employee_${result.country}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ============================================================
@@ -621,7 +626,7 @@ export function exportB2BPDF(
   y = (doc as any).lastAutoTable.finalY + 10;
   addDisclaimer(doc, y);
 
-  doc.save(`TSG_B2B_${cur}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`B2B_${cur}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ============================================================
@@ -765,7 +770,7 @@ export function exportAllocationPDF(
   y = (doc as any).lastAutoTable.finalY + 10;
   addDisclaimer(doc, y);
 
-  doc.save(`TSG_Allocation_${cur}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`Allocation_${cur}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ============================================================
@@ -776,13 +781,15 @@ interface PayslipPDFOptions {
   companyName: string;
   payPeriod: string;
   identity?: EmployeeIdentity;
+  avsNumber?: string;
+  address?: string;
   alignmentCurrency?: string;
   rates?: Record<string, number>;
   generatedBy?: string;
 }
 
 export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptions) {
-  const { companyName, payPeriod, identity, alignmentCurrency, rates, generatedBy } = options;
+  const { companyName, payPeriod, identity, avsNumber, address, alignmentCurrency, rates, generatedBy } = options;
   const showAligned = !!alignmentCurrency && !!rates && alignmentCurrency !== result.currency;
   const cur = result.currency;
 
@@ -794,7 +801,6 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
-  doc.text(companyName, 31, 15);
 
   // Period info right-aligned
   doc.setFontSize(12);
@@ -816,7 +822,8 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
   let y = 32;
 
   // --- Employee Details ---
-  if (identity && (identity.employeeName || identity.dateOfBirth || identity.roleOrPosition)) {
+  const hasEmployeeDetails = (identity && (identity.employeeName || identity.dateOfBirth || identity.roleOrPosition)) || avsNumber || address;
+  if (hasEmployeeDetails) {
     doc.setDrawColor(200, 200, 200);
     doc.line(14, y, pageWidth - 14, y);
     y += 6;
@@ -830,9 +837,11 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(45, 45, 45);
     doc.setFontSize(9);
-    if (identity.employeeName) { doc.text(`Name: ${identity.employeeName}`, 14, y); y += 4.5; }
-    if (identity.dateOfBirth) { doc.text(`Date of Birth: ${identity.dateOfBirth}`, 14, y); y += 4.5; }
-    if (identity.roleOrPosition) { doc.text(`Role / Position: ${identity.roleOrPosition}`, 14, y); y += 4.5; }
+    if (identity?.employeeName) { doc.text(`Name: ${identity.employeeName}`, 14, y); y += 4.5; }
+    if (identity?.dateOfBirth) { doc.text(`Date of Birth: ${identity.dateOfBirth}`, 14, y); y += 4.5; }
+    if (identity?.roleOrPosition) { doc.text(`Role / Position: ${identity.roleOrPosition}`, 14, y); y += 4.5; }
+    if (avsNumber) { doc.text(`AVS Number: ${avsNumber}`, 14, y); y += 4.5; }
+    if (address) { doc.text(`Address: ${address}`, 14, y); y += 4.5; }
     y += 4;
   }
 
@@ -953,7 +962,7 @@ export function exportPayslipPDF(result: PayslipResult, options: PayslipPDFOptio
 
   addDisclaimer(doc, y);
 
-  doc.save(`TSG_Payslip_${payPeriod.replace(/\s/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`Payslip_${payPeriod.replace(/\s/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ============================================================
@@ -1222,5 +1231,5 @@ export function exportAllocationCHPDF(
   const consultantSlug = identity.employeeName
     ? identity.employeeName.replace(/\s+/g, '_')
     : 'allocation';
-  doc.save(`TSG_Allocation_CH_${consultantSlug}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`Allocation_CH_${consultantSlug}_${new Date().toISOString().slice(0, 10)}.pdf`);
 }

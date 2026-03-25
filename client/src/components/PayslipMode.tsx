@@ -112,7 +112,7 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
   const [grossMonthlySalary, setGrossMonthlySalary] = useState<string>(saved?.grossMonthlySalary || '10000');
   const [currency, setCurrency] = useState<string>(saved?.currency || 'CHF');
   const [payPeriod, setPayPeriod] = useState<string>(saved?.payPeriod || new Date().toISOString().slice(0, 7));
-  const [companyName, setCompanyName] = useState<string>(saved?.companyName || 'TSG SA');
+  const [companyName, setCompanyName] = useState<string>(saved?.companyName || '');
 
   // LPP mode: manual or auto-calculated from DOB
   const [lppMode, setLppMode] = useState<LPPMode>(saved?.lppMode || 'MANUAL');
@@ -129,6 +129,10 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
   const [showIdentity, setShowIdentity] = useState(true);
   const [showRateEditor, setShowRateEditor] = useState(false);
 
+  // Optional employee info
+  const [avsNumber, setAvsNumber] = useState<string>(saved?.avsNumber || '');
+  const [address, setAddress] = useState<string>(saved?.address || '');
+
   // Aligned currency
   const [alignmentCurrency, setAlignmentCurrency] = useState<string>(saved?.alignmentCurrency || 'EUR');
   const [showAligned, setShowAligned] = useState(false);
@@ -141,9 +145,9 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
   // Persist inputs
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      grossMonthlySalary, currency, lppEmployeeAmount, lppMode, payPeriod, companyName, deductions, alignmentCurrency, isAmount,
+      grossMonthlySalary, currency, lppEmployeeAmount, lppMode, payPeriod, companyName, deductions, alignmentCurrency, isAmount, avsNumber, address,
     }));
-  }, [grossMonthlySalary, currency, lppEmployeeAmount, lppMode, payPeriod, companyName, deductions, alignmentCurrency, isAmount]);
+  }, [grossMonthlySalary, currency, lppEmployeeAmount, lppMode, payPeriod, companyName, deductions, alignmentCurrency, isAmount, avsNumber, address]);
 
   const updateDeductionRate = (code: string, rate: string) => {
     setDeductions(deductions.map(d => d.code === code ? { ...d, rate } : d));
@@ -277,6 +281,22 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
             onChange={setCompanyName}
             type="text"
             help="Company name displayed on the payslip header."
+          />
+          <InputField
+            label="AVS Number (optional)"
+            value={avsNumber}
+            onChange={setAvsNumber}
+            type="text"
+            placeholder="756.XXXX.XXXX.XX"
+            help="Employee AVS/AHV social security number. Leave blank if not applicable."
+          />
+          <InputField
+            label="Address (optional)"
+            value={address}
+            onChange={setAddress}
+            type="text"
+            placeholder="Street, City"
+            help="Employee address. Leave blank if not applicable."
           />
           <div className="grid grid-cols-2 gap-3">
             <InputField
@@ -425,6 +445,8 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
           {result && (
             <Button variant="outline" onClick={() => { exportPayslipPDF(result, {
               companyName, payPeriod: formatPeriod(payPeriod), identity,
+              avsNumber: avsNumber || undefined,
+              address: address || undefined,
               alignmentCurrency: showAligned ? alignmentCurrency : undefined,
               rates: showAligned ? rates : undefined,
               generatedBy: currentUser?.full_name,
@@ -445,34 +467,32 @@ export default function PayslipMode({ fxData, identity, onIdentityChange, curren
         {result ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* Payslip Header */}
-            <div className="bg-gray-800 text-white p-5">
+            <div className="bg-white border-b border-gray-200 p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <svg width="28" height="22" viewBox="0 0 120 100">
-                      <polygon points="10,50 35,25 60,50 35,75" fill="#D6001C"/>
-                      <polygon points="35,50 60,25 85,50 60,75" fill="#FFFFFF"/>
-                      <polygon points="35,50 47,38 60,50 47,62" fill="#D6001C"/>
-                    </svg>
-                    <span className="font-bold text-sm">{companyName}</span>
+                    <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
+                    {companyName && <span className="font-bold text-sm text-gray-800">{companyName}</span>}
                   </div>
-                  <p className="text-gray-400 text-xs">Pay Statement</p>
+                  <p className="text-gray-500 text-xs">Pay Statement</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold">{formatPeriod(payPeriod)}</p>
+                  <p className="text-sm font-semibold text-gray-800">{formatPeriod(payPeriod)}</p>
                   <p className="text-gray-400 text-[10px]">{result.currency}</p>
                 </div>
               </div>
             </div>
 
             {/* Employee Details */}
-            {(identity.employeeName || identity.dateOfBirth || identity.roleOrPosition) && (
+            {(identity.employeeName || identity.dateOfBirth || identity.roleOrPosition || avsNumber || address) && (
               <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
                 <h4 className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Employee Details</h4>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   {identity.employeeName && <div><span className="text-gray-400">Name:</span> <span className="font-medium">{identity.employeeName}</span></div>}
                   {identity.dateOfBirth && <div><span className="text-gray-400">DOB:</span> <span className="font-medium">{identity.dateOfBirth}</span></div>}
                   {identity.roleOrPosition && <div><span className="text-gray-400">Role:</span> <span className="font-medium">{identity.roleOrPosition}</span></div>}
+                  {avsNumber && <div><span className="text-gray-400">AVS:</span> <span className="font-medium">{avsNumber}</span></div>}
+                  {address && <div className="col-span-2"><span className="text-gray-400">Address:</span> <span className="font-medium">{address}</span></div>}
                 </div>
               </div>
             )}

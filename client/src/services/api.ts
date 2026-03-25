@@ -1,46 +1,24 @@
 // ============================================================
-// API Service — all backend calls, with Entra Bearer token
+// API Service — all backend calls, with session Bearer token
 // ============================================================
 
-import { PublicClientApplication, InteractionRequiredAuthError } from '@azure/msal-browser';
-import { msalConfig, loginScopes } from '../authConfig';
-
 const API_BASE = '/api';
-
-// Reuse the same MSAL instance (singleton created in main.tsx)
-// We import the config here just to construct an identical instance reference.
-// In practice the browser-cached singleton is used — MSAL deduplicates by clientId.
-let _msalInstance: PublicClientApplication | null = null;
-function getMsal(): PublicClientApplication {
-  if (!_msalInstance) {
-    _msalInstance = new PublicClientApplication(msalConfig);
-  }
-  return _msalInstance;
-}
-
-/** Silently get an up-to-date ID token for the active account */
-async function getBearerToken(): Promise<string | null> {
-  try {
-    const msal = getMsal();
-    const account = msal.getActiveAccount() ?? msal.getAllAccounts()[0];
-    if (!account) return null;
-    const result = await msal.acquireTokenSilent({ scopes: loginScopes, account });
-    return result.idToken;          // ID token validated server-side by audience = clientId
-  } catch (e) {
-    if (e instanceof InteractionRequiredAuthError) {
-      // Session expired — force a fresh redirect login
-      getMsal().loginRedirect({ scopes: loginScopes });
-    }
-    return null;
-  }
-}
+const TOKEN_KEY = 'tsg_auth_token';
 
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = await getBearerToken();
+  const token = sessionStorage.getItem(TOKEN_KEY);
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${endpoint}`, { headers, ...options });
+
+  // Session expired or invalid — clear token and reload to show login page
+  if (res.status === 401) {
+    sessionStorage.removeItem(TOKEN_KEY);
+    window.location.reload();
+    throw new Error('Session expired. Please sign in again.');
+  }
+
   let data: any;
   try {
     data = await res.json();

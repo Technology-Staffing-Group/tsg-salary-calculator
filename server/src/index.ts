@@ -5,7 +5,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
-import jwt from 'jsonwebtoken';
 import apiRoutes from './routes/api';
 
 const app = express();
@@ -14,25 +13,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ---- Auth routes (not protected) ----
-app.post('/api/auth/login', (req: Request, res: Response) => {
-  const { username, password } = req.body ?? {};
-  const validUser = process.env.APP_USERNAME;
-  const validPass = process.env.APP_PASSWORD;
-  const secret = process.env.APP_SESSION_SECRET;
-
-  if (!validUser || !validPass || !secret) {
-    return res.status(500).json({ success: false, error: 'Auth not configured on server.' });
-  }
-  if (!username || !password || username !== validUser || password !== validPass) {
-    return res.status(401).json({ success: false, error: 'Invalid username or password.' });
-  }
-
-  const token = jwt.sign({ sub: username }, secret, { expiresIn: '8h' });
-  return res.json({ success: true, token });
-});
-
-// API routes (all protected)
+// API routes
+// NOTE: authentication has moved to the frontend (Firebase Auth).
+// The `requireAuth` middleware in middleware/auth.ts is kept in
+// place for the future Microsoft Entra ID rollout but is not
+// applied to the router during the Firebase migration.
 app.use('/api', apiRoutes);
 
 // Global error handler

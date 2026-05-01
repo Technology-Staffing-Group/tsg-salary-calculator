@@ -1,22 +1,50 @@
 // ============================================================
-// AuthGuard — blocks the app until the user is signed in
-// with a username / password checked server-side
+// AuthGuard — blocks the app until the user is signed in via
+// Firebase Authentication (email + password).
 // ============================================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  type User,
+} from 'firebase/auth';
+import { auth } from '../config/firebase';
 
-const TOKEN_KEY = 'tsg_auth_token';
+// ---- Reactive current-user hook ----
+//
+// onAuthStateChanged is the single source of truth. We expose it
+// to React components via useSyncExternalStore so any component
+// (App header, mode components, etc.) can read the live user
+// without prop-drilling.
+let currentUser: User | null = auth.currentUser;
+const listeners = new Set<() => void>();
 
-export function getAuthToken(): string | null {
-  return sessionStorage.getItem(TOKEN_KEY);
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  listeners.forEach((l) => l());
+});
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
 }
 
-export function clearAuthToken() {
-  sessionStorage.removeItem(TOKEN_KEY);
+function getSnapshot(): User | null {
+  return currentUser;
 }
 
-function LoginPage({ onSuccess }: { onSuccess: () => void }) {
-  const [username, setUsername] = useState('');
+export function useCurrentUser(): User | null {
+  return useSyncExternalStore(subscribe, getSnapshot, () => null);
+}
+
+export async function signOutUser(): Promise<void> {
+  await signOut(auth);
+}
+
+function LoginPage() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,20 +54,19 @@ function LoginPage({ onSuccess }: { onSuccess: () => void }) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setError(data.error || 'Invalid username or password.');
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      // onAuthStateChanged will flip the AuthGuard to authenticated.
+    } catch (err: any) {
+      const code = err?.code as string | undefined;
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+        setError('Invalid email or password.');
+      } else if (code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please try again later.');
+      } else if (code === 'auth/network-request-failed') {
+        setError('Network error. Please try again.');
       } else {
-        sessionStorage.setItem(TOKEN_KEY, data.token);
-        onSuccess();
+        setError(err?.message || 'Sign-in failed.');
       }
-    } catch {
-      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -68,12 +95,12 @@ function LoginPage({ onSuccess }: { onSuccess: () => void }) {
           )}
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Username</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
             <input
-              type="text"
+              type="email"
               autoComplete="username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-tsg-red/40 focus:border-tsg-red"
             />
@@ -117,19 +144,27 @@ function LoginPage({ onSuccess }: { onSuccess: () => void }) {
 interface Props { children: React.ReactNode; }
 
 export default function AuthGuard({ children }: Props) {
-  const [authenticated, setAuthenticated] = useState<boolean>(
-    () => !!sessionStorage.getItem(TOKEN_KEY)
-  );
+  // Until the first onAuthStateChanged callback fires, we don't
+  // know whether the user has a persisted session. Show a spinner
+  // for that brief window so we don't flash the login page.
+  const [resolved, setResolved] = useState<boolean>(false);
+  const user = useCurrentUser();
 
-  // Listen for 401 responses from api.ts
   useEffect(() => {
-    const onUnauth = () => setAuthenticated(false);
-    window.addEventListener('tsg:unauthenticated', onUnauth);
-    return () => window.removeEventListener('tsg:unauthenticated', onUnauth);
+    const unsub = onAuthStateChanged(auth, () => setResolved(true));
+    return unsub;
   }, []);
 
-  if (!authenticated) {
-    return <LoginPage onSuccess={() => setAuthenticated(true)} />;
+  if (!resolved) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <span className="w-6 h-6 border-2 border-tsg-red border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
   }
   return <>{children}</>;
 }

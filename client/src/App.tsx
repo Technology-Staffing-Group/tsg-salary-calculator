@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EmployeeMode from './components/EmployeeMode';
 import B2BMode from './components/B2BMode';
 import AllocationMode from './components/AllocationMode';
-import AuthGuard, { clearAuthToken } from './components/AuthGuard';
+import AuthGuard, { signOutUser, useCurrentUser } from './components/AuthGuard';
 import { api } from './services/api';
 import type { AppMode, FXData, EmployeeIdentity } from './types';
 
@@ -27,10 +27,10 @@ export default function App() {
   const [fxData, setFxData] = useState<FXData | null>(null);
   const [fxLoading, setFxLoading] = useState(false);
   const [identity, setIdentity] = useState<EmployeeIdentity>(loadIdentity);
+  const user = useCurrentUser();
 
   const handleSignOut = () => {
-    clearAuthToken();
-    window.dispatchEvent(new Event('tsg:unauthenticated'));
+    signOutUser().catch(err => console.warn('Sign-out failed:', err));
   };
 
   const loadFXRates = async () => {
@@ -79,7 +79,15 @@ export default function App() {
                 )}
               </div>
 
-              {/* Sign-out */}
+              {/* User email + Sign-out */}
+              {user?.email && (
+                <span
+                  className="hidden sm:inline text-xs text-gray-500 truncate max-w-[200px]"
+                  title={user.email}
+                >
+                  {user.email}
+                </span>
+              )}
               <button
                 onClick={handleSignOut}
                 title="Sign out"

@@ -116,6 +116,17 @@ webapp/
 
 - Node.js 18+ (LTS recommended)
 - npm 9+
+- A **Firebase project** with Authentication (Email/Password sign-in) and Firestore enabled
+
+### Firebase configuration
+
+The frontend uses Firebase for sign-in and Firestore for audit logs and saved calculations.
+
+1. Create a Firebase project (or reuse an existing one) and enable **Authentication → Email/Password** and **Cloud Firestore**.
+2. Copy [client/.env.example](client/.env.example) to `client/.env` and fill in the six `VITE_FIREBASE_*` values from **Firebase Console → Project Settings → General → Your apps → SDK setup and configuration**.
+3. Create at least one user in **Authentication → Users** so you can sign in.
+
+> ⚠️ **Vercel deployments:** Vite bakes `VITE_*` variables into the bundle at build time. Set all six `VITE_FIREBASE_*` variables under **Vercel → Project → Settings → Environment Variables** (Production / Preview / Development as appropriate) **before** the build runs. Changing them later requires a fresh deploy.
 
 ### Development Setup
 
@@ -127,6 +138,10 @@ cd webapp
 # Install dependencies
 cd server && npm install
 cd ../client && npm install
+
+# Set up Firebase env vars (see above)
+cp client/.env.example client/.env
+# …then edit client/.env with your project's values
 
 # Start the backend (port 4000)
 cd ../server

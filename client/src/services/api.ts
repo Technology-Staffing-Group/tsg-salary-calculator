@@ -1,23 +1,19 @@
 // ============================================================
-// API Service — all backend calls, with session Bearer token
+// API Service — backend calls.
+//
+// Auth is handled client-side via Firebase Auth (see AuthGuard).
+// The server middleware `requireAuth` is currently disabled
+// during the Firebase migration, so no Bearer token is sent.
+// (When Microsoft Entra ID SSO is wired up, the Firebase ID
+// token will be forwarded here and validated server-side.)
 // ============================================================
 
 const API_BASE = '/api';
-const TOKEN_KEY = 'tsg_auth_token';
 
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = sessionStorage.getItem(TOKEN_KEY);
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${endpoint}`, { headers, ...options });
-
-  // Session expired or invalid — clear token and notify AuthGuard
-  if (res.status === 401) {
-    sessionStorage.removeItem(TOKEN_KEY);
-    window.dispatchEvent(new Event('tsg:unauthenticated'));
-    throw new Error('Session expired. Please sign in again.');
-  }
 
   let data: any;
   try {

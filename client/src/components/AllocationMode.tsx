@@ -3,6 +3,8 @@ import { Card, InputField, SelectField, Button, Disclaimer, ResultRow, Spinner, 
 import EmployeeIdentityFields from './EmployeeIdentityFields';
 import { api } from '../services/api';
 import { exportAllocationCHPDF } from '../services/pdfExport';
+import { useCurrentUser } from './AuthGuard';
+import { logAuditEvent, saveCalculation } from '../services/firestore';
 import type { AllocationResultCH, ClientResultCH, FXData, EmployeeIdentity } from '../types';
 
 const STORAGE_KEY = 'tsg_allocation_v2_inputs';
@@ -97,9 +99,10 @@ function computeSensitivity(
   }));
 }
 
-interface Props { fxData: FXData | null; currentUser?: { full_name: string; token: string } | null; }
+interface Props { fxData: FXData | null; }
 
-export default function AllocationMode({ fxData, currentUser }: Props) {
+export default function AllocationMode({ fxData }: Props) {
+  const user = useCurrentUser();
   const saved = loadSaved();
 
   const [identity, setIdentity] = useState<EmployeeIdentity>(saved?.identity || { employeeName: '', dateOfBirth: '', roleOrPosition: '' });
@@ -153,7 +156,7 @@ export default function AllocationMode({ fxData, currentUser }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.calculateAllocation({
+      const payload = {
         grossAnnualSalary: Number(grossSalary),
         workingDaysPerYear: Number(workingDays || 220),
         currency,
@@ -166,8 +169,10 @@ export default function AllocationMode({ fxData, currentUser }: Props) {
         employeeAge: employeeAge ?? undefined,
         lfpRate: Number(lfpRate) / 100,
         laaNonProfessionalRate: Number(laaRate) / 100,
-      }) as AllocationResultCH;
+      };
+      const data = await api.calculateAllocation(payload) as AllocationResultCH;
       setResult(data);
+      saveCalculation({ mode: 'allocation', inputs: payload, results: data as unknown as Record<string, unknown> });
     } catch (err: any) {
       setError(err.message || 'Calculation failed');
     } finally {
@@ -364,10 +369,13 @@ export default function AllocationMode({ fxData, currentUser }: Props) {
             {loading ? 'Calculating…' : 'Calculate'}
           </Button>
           {result && (
-            <Button variant="outline" onClick={() => exportAllocationCHPDF(
-              result, identity, breakEvens, sensitivityRows,
-              weakestClient?.clientName ?? null, currentUser?.full_name,
-            )}>
+            <Button variant="outline" onClick={() => {
+              logAuditEvent({ action: 'pdf_export', mode: 'allocation' });
+              exportAllocationCHPDF(
+                result, identity, breakEvens, sensitivityRows,
+                weakestClient?.clientName ?? null, user?.email ?? undefined,
+              );
+            }}>
               Download PDF
             </Button>
           )}

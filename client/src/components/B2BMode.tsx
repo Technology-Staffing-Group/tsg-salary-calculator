@@ -4,6 +4,8 @@ import EmployeeIdentityFields from './EmployeeIdentityFields';
 import AlignedCurrencyPanel, { AlignedValue } from './AlignedCurrencyPanel';
 import { api } from '../services/api';
 import { exportB2BPDF, PDFAlignedOptions } from '../services/pdfExport';
+import { useCurrentUser } from './AuthGuard';
+import { logAuditEvent, saveCalculation } from '../services/firestore';
 import type { B2BResult, PricingMode, RateType, FXData, EmployeeIdentity } from '../types';
 
 const STORAGE_KEY = 'tsg_b2b_inputs';
@@ -11,9 +13,10 @@ function loadSaved(): any {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; }
 }
 
-interface Props { fxData: FXData | null; identity: EmployeeIdentity; onIdentityChange: (id: EmployeeIdentity) => void; currentUser?: { full_name: string; token: string } | null; }
+interface Props { fxData: FXData | null; identity: EmployeeIdentity; onIdentityChange: (id: EmployeeIdentity) => void; }
 
-export default function B2BMode({ fxData, identity, onIdentityChange, currentUser }: Props) {
+export default function B2BMode({ fxData, identity, onIdentityChange }: Props) {
+  const user = useCurrentUser();
   const saved = loadSaved();
   const [costRate, setCostRate] = useState<string>(saved?.costRate || '800');
   const [rateType, setRateType] = useState<RateType>(saved?.rateType || 'DAILY');
@@ -115,6 +118,7 @@ export default function B2BMode({ fxData, identity, onIdentityChange, currentUse
 
       const data = await api.calculateB2B(payload) as B2BResult;
       setResult(data);
+      saveCalculation({ mode: 'b2b', inputs: payload, results: data as unknown as Record<string, unknown> });
     } catch (err: any) {
       setError(err.message || 'Calculation failed');
     } finally {
@@ -275,7 +279,10 @@ export default function B2BMode({ fxData, identity, onIdentityChange, currentUse
             {loading ? 'Calculating...' : 'Calculate'}
           </Button>
           {result && (
-            <Button variant="outline" onClick={() => { exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, currentUser?.full_name); }}>
+            <Button variant="outline" onClick={() => {
+              logAuditEvent({ action: 'pdf_export', mode: 'b2b' });
+              exportB2BPDF(result, { costRate: Number(costRate), rateType, pricingMode, currency }, identity, showAligned ? { showAligned, alignmentCurrency, rates } as PDFAlignedOptions : undefined, user?.email ?? undefined);
+            }}>
               Download PDF
             </Button>
           )}

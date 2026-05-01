@@ -3,7 +3,10 @@
 // ============================================================
 
 import { Router, Request, Response } from 'express';
-import { requireAuth } from '../middleware/auth';
+// NOTE: requireAuth from ../middleware/auth is intentionally NOT
+// applied during the Firebase migration. Authentication is handled
+// client-side; the middleware file is preserved for future Entra
+// ID work.
 import { calculateEmployee } from '../services/calculatorEmployee';
 import { calculateB2B } from '../services/calculatorB2B';
 import { calculateAllocation, calculateAllocationCH } from '../services/calculatorAllocation';
@@ -23,9 +26,6 @@ import {
 } from '../services/withholdingVD';
 
 const router = Router();
-
-// Protect every route in this router — valid Entra ID token required
-router.use(requireAuth);
 
 /**
  * Convert a CHF amount to the target currency using FX rates (base: RON).
